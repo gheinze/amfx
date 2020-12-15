@@ -1,0 +1,14 @@
+/* 
+    Created on : Dec. 14, 2020, 12:35:23 p.m.
+    Author     : glenn
+*/
+
+.text-field:error {
+  -fx-text-box-border: red ;
+  -fx-focus-color: red ;
+}
+
+.spinner:error {
+  -fx-text-box-border: red ;
+  -fx-focus-color: red ;
+}
