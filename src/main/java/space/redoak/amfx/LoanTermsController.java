@@ -1,0 +1,360 @@
+package space.redoak.amfx;
+
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXDatePicker;
+import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.controls.JFXToggleButton;
+import com.jfoenix.validation.RequiredFieldValidator;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.BooleanSupplier;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javax.money.MonetaryAmount;
+import javax.money.format.AmountFormatQueryBuilder;
+import javax.money.format.MonetaryAmountFormat;
+import javax.money.format.MonetaryFormats;
+import org.javamoney.moneta.Money;
+import org.javamoney.moneta.format.CurrencyStyle;
+import space.redoak.finance.loan.AmortizationAttributes;
+import space.redoak.finance.loan.AmortizationCalculator;
+import space.redoak.finance.loan.TimePeriod;
+
+
+public class LoanTermsController  {
+
+    @FXML
+    private JFXTextField amountJfxTextField;
+
+    @FXML
+    private JFXTextField rateJfxTextField;
+
+    @FXML
+    private JFXToggleButton amortizedJfxToggleButton;
+
+    @FXML
+    private JFXTextField amYearsJfxTextField;
+
+    @FXML
+    private JFXTextField amMonthsJfxTextField;
+
+    @FXML
+    private JFXComboBox<TimePeriod> compoundingPeriodJfxComboBox;
+
+    @FXML
+    private JFXComboBox<TimePeriod> paymentFrequencyJfxComboBox;
+
+    @FXML
+    private Label paymentLabel;
+
+    @FXML
+    private JFXTextField preparedForJfxTextField;
+
+    @FXML
+    private JFXTextField preparedByJfxTextField;
+
+    @FXML
+    private JFXTextField termYearsJfxTextField;
+
+    @FXML
+    private JFXTextField termMonthsJfxTextField;
+
+    @FXML
+    private JFXDatePicker startDateJfxDatePicker;
+
+    @FXML
+    private JFXDatePicker adjustmentDateJfxDatePicker;
+
+    @FXML
+    private JFXTextField paymentOverrideJfxTextField;
+
+    @FXML
+    private JFXButton scheduleJfxButton;
+
+    @FXML
+    private JFXButton pdfJfxButton;
+
+
+    public final static Pattern CURRENCY_PATTERN = Pattern.compile("^\\d{1,8}(\\.\\d{0,2})?$");
+    public final static Pattern INTEREST_PATTERN = Pattern.compile("^\\d{1,2}(\\.\\d{0,3})?$");
+    public final static Pattern DOUBLE_DIGIT_INT_PATTERN = Pattern.compile("^\\d{1,2}$");
+
+    private final List<BooleanSupplier> fieldValidators = new ArrayList<>();
+
+    private final RequiredFieldValidator foenixRequiredFieldValidator = new RequiredFieldValidator();
+
+
+    
+    
+    @FXML
+    public void initialize() {
+        
+        foenixRequiredFieldValidator.setMessage("required");
+    
+        prepareNumericField(amountJfxTextField, 100000, CURRENCY_PATTERN);
+        prepareNumericField(rateJfxTextField, 7, INTEREST_PATTERN);
+        
+        prepareYearMonthInterval(amYearsJfxTextField, amMonthsJfxTextField, 20, 0);
+        prepareCompoundingPeriod();
+        
+        prepareYearMonthInterval(termYearsJfxTextField, termMonthsJfxTextField, 1, 0);
+        
+        preparePaymentPeriod();
+        prepareStartDates();
+        
+        startDateJfxDatePicker.valueProperty().addListener(
+                (var observable, var oldValue, var newValue) -> {
+                    adjustmentDateJfxDatePicker.setValue(
+                            calculateAdjustmentDate(startDateJfxDatePicker.getValue())
+                    );
+                });
+        
+        amortizedJfxToggleButton.setSelected(true);
+        
+        fireFormStateChange();
+
+    }
+
+
+    @FXML
+    private void amortizationStateChanged() {
+        boolean disabled = !amortizedJfxToggleButton.isSelected();
+        amYearsJfxTextField.setDisable(disabled);
+        amMonthsJfxTextField.setDisable(disabled);
+        compoundingPeriodJfxComboBox.setDisable(disabled);
+        fireFormStateChange();
+    }
+
+
+    private void prepareNumericField(JFXTextField field, int defaultValue, Pattern numberPattern) {
+        
+        field.setText(String.valueOf(defaultValue));
+        
+        // key press filter
+        setNumericChangeListener(field, numberPattern);
+        
+        // ui error presenter
+        field.getValidators().add(foenixRequiredFieldValidator);
+        field.focusedProperty().addListener((o,oldVal, newVal)->{
+            if(!newVal) { field.validate(); }
+        });
+        
+        // register a check to see if this field is valid
+        fieldValidators.add(() -> { return !field.getText().isBlank(); });
+    }
+        
+    
+    private void prepareCompoundingPeriod() {
+        
+        List<TimePeriod> compoundingPeriods = Arrays.stream(TimePeriod.values())
+                .filter(tp -> tp.isCompoundingPeriod())
+                .sorted()
+                .collect(Collectors.toList())
+                ;        
+        compoundingPeriodJfxComboBox.getItems().addAll(compoundingPeriods);
+        compoundingPeriodJfxComboBox.getSelectionModel().select(TimePeriod.SemiAnnually);
+        setUpComboChangeListener(compoundingPeriodJfxComboBox);
+
+    }
+    
+    
+    private void preparePaymentPeriod() {
+        
+        List<TimePeriod> paymentPeriods = Arrays.stream(TimePeriod.values())
+                .sorted()
+                .collect(Collectors.toList())
+                ;        
+        paymentFrequencyJfxComboBox.getItems().addAll(paymentPeriods);
+        paymentFrequencyJfxComboBox.getSelectionModel().select(TimePeriod.Monthly);
+        setUpComboChangeListener(paymentFrequencyJfxComboBox);
+
+    }
+    
+    
+    private void prepareYearMonthInterval(
+            JFXTextField yearControl,
+            JFXTextField monthControl,
+            int defaultYears,
+            int defaultMonths
+    ) {
+        
+        // Default values
+        yearControl.setText(Integer.toString(defaultYears));
+        monthControl.setText(Integer.toString(defaultMonths));
+        
+        // Restrict key press to numeric
+        setNumericChangeListener(yearControl, DOUBLE_DIGIT_INT_PATTERN, 35);
+        setNumericChangeListener(monthControl, DOUBLE_DIGIT_INT_PATTERN, 12);
+
+        // ui error presentation on focus lost
+        FoenixTermValidator termValidator = new FoenixTermValidator(yearControl, monthControl);
+        yearControl.getValidators().add(termValidator);
+        monthControl.getValidators().add(termValidator);
+
+        yearControl.focusedProperty().addListener((o,oldVal, newVal)->{
+            if(!newVal) { yearControl.validate(); monthControl.validate(); }
+        });
+        
+        monthControl.focusedProperty().addListener((o,oldVal, newVal)->{
+            if(!newVal) { yearControl.validate(); monthControl.validate(); }
+        });
+
+
+        // register a form validation check on the pair
+        fieldValidators.add(() -> { 
+    
+            if (yearControl.getId().equals(amYearsJfxTextField.getId()) && !amortizedJfxToggleButton.isSelected()) {
+                return true;
+            }
+            
+            boolean valid = false;
+
+            try {
+                int years = Integer.parseInt(yearControl.getText());
+                int months = Integer.parseInt(monthControl.getText());
+                valid = ((years + months) > 0);
+            } catch (NumberFormatException nfe) {
+            }
+            
+            return valid;
+            
+        });
+        
+    }
+    
+    
+    private void prepareStartDates() {
+        LocalDate today = LocalDate.now();
+        startDateJfxDatePicker.setValue(today);
+        adjustmentDateJfxDatePicker.setValue(calculateAdjustmentDate(today));        
+    }
+    
+    
+    
+    private void setNumericChangeListener(JFXTextField textField, Pattern pattern) {
+        setNumericChangeListener(textField, pattern, -1);
+    }
+    
+    private void setNumericChangeListener(JFXTextField textField, Pattern pattern, int maxInt) {
+        
+        StringProperty textProperty = textField.textProperty();
+        
+        textProperty.addListener(
+                (var observable, var oldValue, var newValue) -> {
+                    if (newValue.isBlank()) {
+                        // null handling
+                        textField.setText("");
+                    } else if (!pattern.matcher(newValue).matches()) {
+                        // pattern matching
+                        textField.setText(oldValue);
+                    } else if (maxInt > 0  && Integer.parseInt(newValue) > maxInt) {
+                        // integer range matching
+                        textField.setText(oldValue);
+                    }
+                    fireFormStateChange();
+                }
+        );
+        
+    }
+    
+    private void setUpComboChangeListener(ComboBox<TimePeriod> comboBox) {
+        comboBox.valueProperty().addListener((ObservableValue<? extends TimePeriod> observable, TimePeriod oldValue, TimePeriod newValue) -> {
+            fireFormStateChange();
+        });
+    }
+
+    private void fireFormStateChange() {
+        
+        boolean formHasError = fieldValidators.stream()
+                .filter(v -> !v.getAsBoolean())
+                .findAny()
+                .isPresent()
+                ;
+        
+        scheduleJfxButton.setDisable(formHasError);
+        pdfJfxButton.setDisable(formHasError);
+        
+        if (formHasError) {
+            paymentLabel.setText("");
+        } else {
+            MonetaryAmount periodicPayment = AmortizationCalculator.getPeriodicPayment(getAmAttributes());
+            
+            MonetaryAmountFormat customFormat = MonetaryFormats.getAmountFormat(
+                    AmountFormatQueryBuilder
+                            .of(Locale.CANADA)
+                            .set(CurrencyStyle.SYMBOL)
+                            .build()
+            );
+            
+            String customFormatted = customFormat.format(periodicPayment);
+            paymentLabel.setText(customFormatted);
+//            paymentLabel.setText(periodicPayment.toString().split(" ")[1]);
+        }
+        
+    }
+        
+    private LocalDate calculateAdjustmentDate(LocalDate fromDate) {
+        
+        if (null == fromDate) {
+            return null;
+        }
+        
+        int year = fromDate.getYear();
+        int month = fromDate.getMonthValue();
+        var dayOfMonth = fromDate.getDayOfMonth();
+
+        if (dayOfMonth > 15) {
+            if (++month > 12) {
+                year++;
+                month = 1;
+            }
+            dayOfMonth = 1;
+        } else if (dayOfMonth > 1 && dayOfMonth < 15) {
+            dayOfMonth = 15;
+        }
+
+        return LocalDate.of(year, month, dayOfMonth);
+        
+    }
+
+
+    private AmortizationAttributes getAmAttributes() {
+        
+        BigDecimal amount = new BigDecimal(amountJfxTextField.getText());
+        Money moneyAmount = Money.of(amount, "CAD");
+        
+        int amYears  = Integer.parseInt(amYearsJfxTextField.getText());
+        int amMonths = Integer.parseInt(amMonthsJfxTextField.getText());
+        int amPeriod = amYears * 12 + amMonths;
+        
+        int termYears  = Integer.parseInt(termYearsJfxTextField.getText());
+        int termMonths = Integer.parseInt(termMonthsJfxTextField.getText());
+        int termPeriod = termYears * 12 + termMonths;
+        
+        AmortizationAttributes attr = new AmortizationAttributes();
+        attr.setLoanAmount(moneyAmount);
+        //attr.setRegularPayment();
+        attr.setStartDate(startDateJfxDatePicker.getValue());
+        attr.setAdjustmentDate(adjustmentDateJfxDatePicker.getValue());
+        attr.setTermInMonths(termPeriod);
+        attr.setInterestOnly(!amortizedJfxToggleButton.isSelected());
+        attr.setAmortizationPeriodInMonths(amPeriod);
+        attr.setCompoundingPeriodsPerYear(compoundingPeriodJfxComboBox.getValue().getPeriodsPerYear());
+        attr.setPaymentFrequency(paymentFrequencyJfxComboBox.getValue().getPeriodsPerYear());
+        attr.setInterestRateAsPercent(Double.valueOf(rateJfxTextField.getText()));
+
+        return attr;
+    }
+
+    
+}

@@ -3,9 +3,8 @@ package space.redoak.amfx;
 import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.scene.control.TabPane;
-import space.redoak.finance.loan.gui.AmortizationTab;
 
-public class PrimaryController {
+public class AppController {
 
     @FXML
     private TabPane tabPane;

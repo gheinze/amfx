@@ -10,7 +10,6 @@ module space.redoak.amfx {
     requires java.money;
     requires org.javamoney.moneta;
     requires com.jfoenix;
-    requires space.redoak.jfx;
 
     requires static lombok;
 

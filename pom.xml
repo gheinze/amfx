@@ -9,7 +9,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>15</maven.compiler.source>
         <maven.compiler.target>15</maven.compiler.target>
+        <java.version>15</java.version>
         <lombok.version>1.18.16</lombok.version>
+        <money.version>1.4.2</money.version>
+        <jfx.version>15.0.1</jfx.version>
+        <jfoenix.version>9.0.10</jfoenix.version>
     </properties>
     
     
@@ -18,19 +22,19 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>15.0.1</version>
+            <version>${jfx.version}</version>
         </dependency>
         
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>15.0.1</version>
+            <version>${jfx.version}</version>
         </dependency>
         
         <dependency>
             <groupId>org.javamoney</groupId>
             <artifactId>moneta</artifactId>
-            <version>1.4.2</version>
+            <version>${money.version}</version>
         </dependency>
         
         <dependency>
@@ -50,7 +54,7 @@
         <dependency>
             <groupId>com.jfoenix</groupId>
             <artifactId>jfoenix</artifactId>
-            <version>9.0.10</version>
+            <version>${jfoenix.version}</version>
         </dependency>
 
     </dependencies>
@@ -69,6 +73,10 @@
                     <options>
                         <option>--enable-preview</option>
                         <option>--add-opens java.base/java.lang.reflect=com.jfoenix</option>
+                        <option>--add-opens javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix</option>
+                        <option>--add-opens javafx.base/com.sun.javafx.binding=com.jfoenix</option>
+                        <option>--add-opens javafx.graphics/com.sun.javafx.stage=com.jfoenix</option>
+                        <option>--add-opens javafx.base/com.sun.javafx.event=com.jfoenix</option>
                     </options>
                 </configuration>
                 <executions>
@@ -86,6 +94,10 @@
                                 <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:8000</option>
                                 <option>--enable-preview</option>
                                 <option>--add-opens java.base/java.lang.reflect=com.jfoenix</option>
+                                <option>--add-opens javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix</option>
+                                <option>--add-opens javafx.base/com.sun.javafx.binding=com.jfoenix</option>
+                                <option>--add-opens javafx.graphics/com.sun.javafx.stage=com.jfoenix</option>
+                                <option>--add-opens javafx.base/com.sun.javafx.event=com.jfoenix</option>
                             </options>
                         </configuration>
                     </execution>
@@ -97,6 +109,10 @@
                                 <option>-agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=${jpda.address}</option>
                                 <option>--enable-preview</option>
                                 <option>--add-opens java.base/java.lang.reflect=com.jfoenix</option>
+                                <option>--add-opens javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix</option>
+                                <option>--add-opens javafx.base/com.sun.javafx.binding=com.jfoenix</option>
+                                <option>--add-opens javafx.graphics/com.sun.javafx.stage=com.jfoenix</option>
+                                <option>--add-opens javafx.base/com.sun.javafx.event=com.jfoenix</option>
                             </options>
                             <mainClass>space.redoak.amfx.App</mainClass>
                         </configuration>
@@ -122,7 +138,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <release>15</release>
+                    <release>${java.version}</release>
                     <compilerArgs>
                         <arg>--enable-preview</arg>
                     </compilerArgs>

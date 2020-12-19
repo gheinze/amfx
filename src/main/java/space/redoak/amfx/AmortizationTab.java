@@ -1,4 +1,4 @@
-package space.redoak.finance.loan.gui;
+package space.redoak.amfx;
 
 
 import java.io.IOException;
@@ -18,7 +18,8 @@ public class AmortizationTab extends Tab {
     
     public AmortizationTab() throws IOException {
         super("AmSched " + tabNumber++);
-        Pane mortgageAttributePane =  FXMLLoader.load(getClass().getResource("/space/redoak/amfx/mortgageAmountForm.fxml"));
+//        Pane mortgageAttributePane =  FXMLLoader.load(getClass().getResource("/space/redoak/amfx/mortgageAmountForm.fxml"));
+        Pane mortgageAttributePane =  FXMLLoader.load(getClass().getResource("/space/redoak/amfx/loanTerms.fxml"));
         this.setContent(mortgageAttributePane);
     }
     
