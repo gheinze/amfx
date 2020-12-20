@@ -16,6 +16,7 @@ public class AppController {
         AmortizationTab tab = new AmortizationTab();
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
     }
     
     

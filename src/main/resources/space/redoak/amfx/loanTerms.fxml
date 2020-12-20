@@ -7,6 +7,8 @@
 <?import com.jfoenix.controls.JFXToggleButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
@@ -60,8 +62,24 @@
             <JFXDatePicker fx:id="startDateJfxDatePicker" layoutX="8.0" layoutY="270.0" prefHeight="29.0" prefWidth="160.0" promptText="Start Date" />
             <JFXDatePicker fx:id="adjustmentDateJfxDatePicker" layoutX="8.0" layoutY="326.0" prefHeight="29.0" prefWidth="160.0" promptText="Adjustment Date" />
             <JFXTextField fx:id="paymentOverrideJfxTextField" labelFloat="true" layoutX="9.0" layoutY="379.0" prefHeight="26.0" prefWidth="148.0" promptText="Payment Override" />
-            <JFXButton fx:id="scheduleJfxButton" layoutX="4.0" layoutY="431.0" minWidth="45.0" prefHeight="26.0" text="Schedule" />
+            <JFXButton fx:id="scheduleJfxButton" layoutX="4.0" layoutY="431.0" minWidth="45.0" onAction="#scheduleButtonClicked" prefHeight="26.0" text="Schedule" />
             <JFXButton fx:id="pdfJfxButton" layoutX="94.0" layoutY="431.0" minWidth="44.0" prefHeight="26.0" text="PDF" />
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </AnchorPane>
+      <AnchorPane>
+         <children>
+            <TableView fx:id="scheduleTable">
+              <columns>
+                <TableColumn fx:id="paymentColumn" editable="false" minWidth="90.0" prefWidth="90.0" sortable="false" text="Payment" />
+                <TableColumn fx:id="dateColumn" editable="false" minWidth="90.0" prefWidth="90.0" text="Date" />
+                  <TableColumn fx:id="interestColumn" editable="false" minWidth="90.0" prefWidth="90.0" sortable="false" styleClass="moneyColumn" text="Interest" />
+                  <TableColumn fx:id="principalColumn" editable="false" minWidth="90.0" prefWidth="90.0" sortable="false" styleClass="moneyColumn" text="Principal" />
+                  <TableColumn fx:id="balanceColumn" editable="false" minWidth="110.0" prefWidth="110.0" sortable="false" styleClass="moneyColumn" text="Balance" />
+              </columns>
+            </TableView>
          </children>
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

@@ -17,7 +17,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("app"), 1000, 600);
+        scene = new Scene(loadFXML("app"), 1200, 600);
         scene.getStylesheets().add(getClass().getResource("amfx.css").toExternalForm());
         stage.setScene(scene);
         stage.setTitle("Asset Manager");

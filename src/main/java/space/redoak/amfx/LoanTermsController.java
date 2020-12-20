@@ -15,11 +15,16 @@ import java.util.Locale;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javax.money.MonetaryAmount;
 import javax.money.format.AmountFormatQueryBuilder;
 import javax.money.format.MonetaryAmountFormat;
@@ -28,6 +33,7 @@ import org.javamoney.moneta.Money;
 import org.javamoney.moneta.format.CurrencyStyle;
 import space.redoak.finance.loan.AmortizationAttributes;
 import space.redoak.finance.loan.AmortizationCalculator;
+import space.redoak.finance.loan.ScheduledPayment;
 import space.redoak.finance.loan.TimePeriod;
 
 
@@ -56,7 +62,8 @@ public class LoanTermsController  {
 
     @FXML
     private Label paymentLabel;
-
+    private MonetaryAmount periodicPayment = Money.of(BigDecimal.ZERO, "CAD");
+    
     @FXML
     private JFXTextField preparedForJfxTextField;
 
@@ -84,7 +91,26 @@ public class LoanTermsController  {
     @FXML
     private JFXButton pdfJfxButton;
 
+    @FXML
+    private TableView<RowData> scheduleTable;
+    
+    @FXML
+    private TableColumn<RowData, Integer> paymentColumn;
 
+    @FXML
+    private TableColumn<RowData, String> dateColumn;
+
+    @FXML
+    private TableColumn<RowData, String> interestColumn;
+
+    @FXML
+    private TableColumn<RowData, String> principalColumn;
+
+    @FXML
+    private TableColumn<RowData, String> balanceColumn;
+
+
+    
     public final static Pattern CURRENCY_PATTERN = Pattern.compile("^\\d{1,8}(\\.\\d{0,2})?$");
     public final static Pattern INTEREST_PATTERN = Pattern.compile("^\\d{1,2}(\\.\\d{0,3})?$");
     public final static Pattern DOUBLE_DIGIT_INT_PATTERN = Pattern.compile("^\\d{1,2}$");
@@ -92,6 +118,13 @@ public class LoanTermsController  {
     private final List<BooleanSupplier> fieldValidators = new ArrayList<>();
 
     private final RequiredFieldValidator foenixRequiredFieldValidator = new RequiredFieldValidator();
+    
+    private static final MonetaryAmountFormat currencyFormatter = MonetaryFormats.getAmountFormat(
+            AmountFormatQueryBuilder
+                    .of(Locale.CANADA)
+                    .set(CurrencyStyle.SYMBOL)
+                    .build()
+    );
 
 
     
@@ -121,6 +154,8 @@ public class LoanTermsController  {
         
         amortizedJfxToggleButton.setSelected(true);
         
+        prepareScheduleTable();
+        
         fireFormStateChange();
 
     }
@@ -135,6 +170,15 @@ public class LoanTermsController  {
         fireFormStateChange();
     }
 
+    
+    @FXML
+    private void scheduleButtonClicked() {
+        List<ScheduledPayment> schedule = AmortizationCalculator.generateSchedule(getAmAttributes());
+        List<RowData> observableCollection = schedule.stream()
+                .map(s -> new RowData(s))
+                .collect(Collectors.toList());
+        scheduleTable.setItems(FXCollections.observableArrayList(observableCollection));        
+    }
 
     private void prepareNumericField(JFXTextField field, int defaultValue, Pattern numberPattern) {
         
@@ -240,6 +284,14 @@ public class LoanTermsController  {
     }
     
     
+    private void prepareScheduleTable() {
+        paymentColumn.setCellValueFactory(param -> param.getValue().payment);
+        dateColumn.setCellValueFactory(param -> param.getValue().date);
+        interestColumn.setCellValueFactory(param -> param.getValue().interest);
+        principalColumn.setCellValueFactory(param -> param.getValue().principal);
+        balanceColumn.setCellValueFactory(param -> param.getValue().balance);        
+    }
+    
     
     private void setNumericChangeListener(JFXTextField textField, Pattern pattern) {
         setNumericChangeListener(textField, pattern, -1);
@@ -287,18 +339,11 @@ public class LoanTermsController  {
         if (formHasError) {
             paymentLabel.setText("");
         } else {
-            MonetaryAmount periodicPayment = AmortizationCalculator.getPeriodicPayment(getAmAttributes());
             
-            MonetaryAmountFormat customFormat = MonetaryFormats.getAmountFormat(
-                    AmountFormatQueryBuilder
-                            .of(Locale.CANADA)
-                            .set(CurrencyStyle.SYMBOL)
-                            .build()
-            );
+            periodicPayment = AmortizationCalculator.getPeriodicPayment(getAmAttributes());
             
-            String customFormatted = customFormat.format(periodicPayment);
+            String customFormatted = currencyFormatter.format(periodicPayment);
             paymentLabel.setText(customFormatted);
-//            paymentLabel.setText(periodicPayment.toString().split(" ")[1]);
         }
         
     }
@@ -343,9 +388,25 @@ public class LoanTermsController  {
         
         AmortizationAttributes attr = new AmortizationAttributes();
         attr.setLoanAmount(moneyAmount);
-        //attr.setRegularPayment();
-        attr.setStartDate(startDateJfxDatePicker.getValue());
-        attr.setAdjustmentDate(adjustmentDateJfxDatePicker.getValue());
+
+
+        BigDecimal override = paymentOverrideJfxTextField.getText().isEmpty() ? 
+                BigDecimal.ZERO : new BigDecimal(paymentOverrideJfxTextField.getText());
+        Money overrideAmount = Money.of(override, "CAD");
+        attr.setRegularPayment(overrideAmount.isGreaterThan(periodicPayment) ? overrideAmount : periodicPayment);
+
+        LocalDate startDate = startDateJfxDatePicker.getValue();
+        LocalDate adjustmentDate = adjustmentDateJfxDatePicker.getValue();
+        
+        if (null == startDate) {
+            startDate = LocalDate.now();
+            adjustmentDate = calculateAdjustmentDate(startDate);
+        } else if (null == adjustmentDate) {
+            adjustmentDate = startDate;
+        }
+        attr.setStartDate(startDate);
+        attr.setAdjustmentDate(adjustmentDate);
+
         attr.setTermInMonths(termPeriod);
         attr.setInterestOnly(!amortizedJfxToggleButton.isSelected());
         attr.setAmortizationPeriodInMonths(amPeriod);
@@ -353,8 +414,28 @@ public class LoanTermsController  {
         attr.setPaymentFrequency(paymentFrequencyJfxComboBox.getValue().getPeriodsPerYear());
         attr.setInterestRateAsPercent(Double.valueOf(rateJfxTextField.getText()));
 
+        //String preparedFor = preparedForJfxTextField.getText();
+        
         return attr;
     }
 
+ 
+    
+    public static class RowData {
+
+        private final ObservableValue<Integer> payment;
+        private final SimpleStringProperty date;
+        private final SimpleStringProperty interest;
+        private final SimpleStringProperty principal;
+        private final SimpleStringProperty balance;
+
+        private RowData(ScheduledPayment payment) {
+            this.payment = new SimpleObjectProperty<>(payment.getPaymentNumber());
+            this.date = new SimpleStringProperty(payment.getPaymentDate().toString());
+            this.interest = new SimpleStringProperty(currencyFormatter.format(payment.getInterest()));
+            this.principal = new SimpleStringProperty(currencyFormatter.format(payment.getPrincipal()));
+            this.balance = new SimpleStringProperty(currencyFormatter.format(payment.getBalance()));
+        }
+    }
     
 }

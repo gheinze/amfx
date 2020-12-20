@@ -1,6 +1,7 @@
 package space.redoak.finance.loan;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
@@ -142,7 +143,27 @@ public class AmortizationCalculator {
 
     }
 
+    
+    private static ScheduledPayment getAdjusmentPayment(AmortizationAttributes amAttrs) {
+        
+        long days = amAttrs.getStartDate().until(amAttrs.getAdjustmentDate(), ChronoUnit.DAYS);
+        
+        MonetaryAmount perDiem = AmortizationCalculator.getPerDiem(
+                amAttrs.getLoanAmount(),
+                amAttrs.getInterestRateAsPercent()
+        ).multiply(days);
+        
+        ScheduledPayment payment = new ScheduledPayment();
+        payment.setPaymentNumber(0);
+        payment.setPaymentDate(amAttrs.getAdjustmentDate());
+        payment.setInterest(perDiem);
+        payment.setPrincipal(perDiem.multiply(0));
+        payment.setBalance(amAttrs.getLoanAmount());
 
+        return payment;
+    };
+    
+    
     /* Any item in the list of interest only scheduled payments can be computed without
      * reliance on previous items in the list.
     */
@@ -155,13 +176,17 @@ public class AmortizationCalculator {
 
 //            private final MonetaryAmount actualPayment = getActualPayment(amAttrs);
 //            private final MonetaryAmount overPayment = actualPayment.subtract(calculatedPayment);
-            private final int expectedNumberOfPayments = getNumberOfExpectedPayments(amAttrs);
+            private final int expectedNumberOfPayments = getNumberOfExpectedPayments(amAttrs) + 1;
 
 
             @Override
-            public ScheduledPayment get(int index) {
+            public ScheduledPayment get(int paymentNumber) {
 
-                ScheduledPayment payment =  getTemplatePayment(index, expectedNumberOfPayments, amAttrs);
+                if (paymentNumber == 0) {
+                    return getAdjusmentPayment(amAttrs);                    
+                }
+                
+                ScheduledPayment payment =  getTemplatePayment(paymentNumber, expectedNumberOfPayments, amAttrs);
 
                 payment.setInterest(calculatedPayment);
                 payment.setPrincipal(principal);
@@ -184,6 +209,8 @@ public class AmortizationCalculator {
     private static List<ScheduledPayment> generateAmortizedSchedule(AmortizationAttributes amAttrs) {
 
         List<ScheduledPayment> schedule = new ArrayList<>();
+        
+        schedule.add(getAdjusmentPayment(amAttrs));
 
         final MonetaryAmount actualPayment = getActualPayment(amAttrs);
         final int expectedNumberOfPayments = getNumberOfExpectedPayments(amAttrs);
@@ -192,7 +219,7 @@ public class AmortizationCalculator {
         double periodicRate = getPeriodRateAsDecimal(amAttrs);
 
         // loop
-        for (int index = 0; index < expectedNumberOfPayments; index++) {
+        for (int paymentNumber = 1; paymentNumber <= expectedNumberOfPayments; paymentNumber++) {
 
             // Interest amounts rounding take precedence
             MonetaryAmount interest = remainingBalance.multiply(periodicRate).with(HALF_UP_ROUNDING_MODE);
@@ -205,7 +232,7 @@ public class AmortizationCalculator {
             }
             remainingBalance = remainingBalance.subtract(principal);
 
-            ScheduledPayment payment =  getTemplatePayment(index, expectedNumberOfPayments, amAttrs);
+            ScheduledPayment payment =  getTemplatePayment(paymentNumber, expectedNumberOfPayments, amAttrs);
 
             payment.setInterest(interest);
             payment.setPrincipal(principal);
@@ -231,10 +258,9 @@ public class AmortizationCalculator {
     }
 
 
-    private static ScheduledPayment getTemplatePayment(int index, int totalPayments, AmortizationAttributes amAttrs) {
+    private static ScheduledPayment getTemplatePayment(int paymentNumber, int totalPayments, AmortizationAttributes amAttrs) {
 
-        int paymentNumber = index + 1;
-        if (index < 0 || index >= totalPayments) {
+        if (paymentNumber < 1 || paymentNumber > totalPayments) {
             throw new IndexOutOfBoundsException(String.format("Payment number %d outside of schedule range 1 - %d", paymentNumber, totalPayments));
         }
 
