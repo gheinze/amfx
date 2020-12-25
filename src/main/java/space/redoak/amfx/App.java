@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import javafx.application.HostServices;
 
 /**
  * JavaFX App
@@ -14,6 +15,7 @@ import java.io.IOException;
 public class App extends Application {
 
     private static Scene scene;
+    public static HostServices hostServices;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -22,6 +24,7 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setTitle("Asset Manager");
         stage.show();
+        hostServices = getHostServices();
     }
 
     static void setRoot(String fxml) throws IOException {

@@ -6,6 +6,8 @@ import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXToggleButton;
 import com.jfoenix.validation.RequiredFieldValidator;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,21 +22,27 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javax.money.MonetaryAmount;
+import javax.money.format.AmountFormatQuery;
 import javax.money.format.AmountFormatQueryBuilder;
 import javax.money.format.MonetaryAmountFormat;
 import javax.money.format.MonetaryFormats;
+import net.sf.jasperreports.engine.JRException;
 import org.javamoney.moneta.Money;
+import org.javamoney.moneta.format.AmountFormatParams;
 import org.javamoney.moneta.format.CurrencyStyle;
 import space.redoak.finance.loan.AmortizationAttributes;
 import space.redoak.finance.loan.AmortizationCalculator;
 import space.redoak.finance.loan.ScheduledPayment;
 import space.redoak.finance.loan.TimePeriod;
+import space.redoak.finance.loan.AmortizationReportService;
+
 
 
 public class LoanTermsController  {
@@ -137,6 +145,13 @@ public class LoanTermsController  {
         prepareNumericField(amountJfxTextField, 100000, CURRENCY_PATTERN);
         prepareNumericField(rateJfxTextField, 7, INTEREST_PATTERN);
         
+        setNumericChangeListener(paymentOverrideJfxTextField, CURRENCY_PATTERN, -1, false);
+        paymentOverrideJfxTextField.focusedProperty().addListener((o) -> {
+            if (!paymentOverrideJfxTextField.getText().isBlank()) {
+                setPaymentOverride();
+            }
+        });
+        
         prepareYearMonthInterval(amYearsJfxTextField, amMonthsJfxTextField, 20, 0);
         prepareCompoundingPeriod();
         
@@ -150,6 +165,7 @@ public class LoanTermsController  {
                     adjustmentDateJfxDatePicker.setValue(
                             calculateAdjustmentDate(startDateJfxDatePicker.getValue())
                     );
+                    fireFormStateChange();
                 });
         
         amortizedJfxToggleButton.setSelected(true);
@@ -167,6 +183,7 @@ public class LoanTermsController  {
         amYearsJfxTextField.setDisable(disabled);
         amMonthsJfxTextField.setDisable(disabled);
         compoundingPeriodJfxComboBox.setDisable(disabled);
+        paymentOverrideJfxTextField.setDisable(disabled);
         fireFormStateChange();
     }
 
@@ -178,8 +195,20 @@ public class LoanTermsController  {
                 .map(s -> new RowData(s))
                 .collect(Collectors.toList());
         scheduleTable.setItems(FXCollections.observableArrayList(observableCollection));        
+        scheduleTable.setVisible(true);
+        //scheduleTable.refresh();
     }
 
+    
+    @FXML
+    private void pdfButtonClicked() throws JRException, IOException {
+        AmortizationReportService service = new AmortizationReportService();
+        File file = service.generatePdfSchedule(getAmAttributes());
+        App.hostServices.showDocument(file.toURI().toString());
+        
+    }
+    
+    
     private void prepareNumericField(JFXTextField field, int defaultValue, Pattern numberPattern) {
         
         field.setText(String.valueOf(defaultValue));
@@ -237,8 +266,8 @@ public class LoanTermsController  {
         monthControl.setText(Integer.toString(defaultMonths));
         
         // Restrict key press to numeric
-        setNumericChangeListener(yearControl, DOUBLE_DIGIT_INT_PATTERN, 35);
-        setNumericChangeListener(monthControl, DOUBLE_DIGIT_INT_PATTERN, 12);
+        setNumericChangeListener(yearControl, DOUBLE_DIGIT_INT_PATTERN, 35, true);
+        setNumericChangeListener(monthControl, DOUBLE_DIGIT_INT_PATTERN, 12, true);
 
         // ui error presentation on focus lost
         FoenixTermValidator termValidator = new FoenixTermValidator(yearControl, monthControl);
@@ -285,6 +314,7 @@ public class LoanTermsController  {
     
     
     private void prepareScheduleTable() {
+        scheduleTable.setVisible(false);
         paymentColumn.setCellValueFactory(param -> param.getValue().payment);
         dateColumn.setCellValueFactory(param -> param.getValue().date);
         interestColumn.setCellValueFactory(param -> param.getValue().interest);
@@ -294,10 +324,10 @@ public class LoanTermsController  {
     
     
     private void setNumericChangeListener(JFXTextField textField, Pattern pattern) {
-        setNumericChangeListener(textField, pattern, -1);
+        setNumericChangeListener(textField, pattern, -1, true);
     }
     
-    private void setNumericChangeListener(JFXTextField textField, Pattern pattern, int maxInt) {
+    private void setNumericChangeListener(JFXTextField textField, Pattern pattern, int maxInt, boolean fireUpdate) {
         
         StringProperty textProperty = textField.textProperty();
         
@@ -313,7 +343,9 @@ public class LoanTermsController  {
                         // integer range matching
                         textField.setText(oldValue);
                     }
-                    fireFormStateChange();
+                    if (fireUpdate) {
+                       fireFormStateChange();
+                    }
                 }
         );
         
@@ -338,16 +370,37 @@ public class LoanTermsController  {
         
         if (formHasError) {
             paymentLabel.setText("");
+            paymentOverrideJfxTextField.setText("");
         } else {
             
             periodicPayment = AmortizationCalculator.getPeriodicPayment(getAmAttributes());
             
             String customFormatted = currencyFormatter.format(periodicPayment);
             paymentLabel.setText(customFormatted);
+            
+            setPaymentOverride();
+
+            scheduleTable.setVisible(false);
+
         }
         
     }
+    
+    private void setPaymentOverride() {
+
+        if (paymentOverrideJfxTextField.getText().isEmpty()) {
+            return;
+        }
         
+        BigDecimal override = new BigDecimal(paymentOverrideJfxTextField.getText());
+        Money overrideAmount = Money.of(override, "CAD");
+        
+        if (periodicPayment.isGreaterThan(overrideAmount)) {
+            paymentOverrideJfxTextField.setText("");
+        }
+        
+    }
+    
     private LocalDate calculateAdjustmentDate(LocalDate fromDate) {
         
         if (null == fromDate) {

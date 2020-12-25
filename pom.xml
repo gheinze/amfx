@@ -7,13 +7,14 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>15</maven.compiler.source>
-        <maven.compiler.target>15</maven.compiler.target>
-        <java.version>15</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <java.version>11</java.version>
         <lombok.version>1.18.16</lombok.version>
         <money.version>1.4.2</money.version>
         <jfx.version>15.0.1</jfx.version>
         <jfoenix.version>9.0.10</jfoenix.version>
+        <jasper.version>6.16.0</jasper.version>
     </properties>
     
     
@@ -31,9 +32,34 @@
             <version>${jfx.version}</version>
         </dependency>
         
+<!--        https://stackoverflow.com/questions/52653836/maven-shade-javafx-runtime-components-are-missing-->
+
+    
         <dependency>
-            <groupId>org.javamoney</groupId>
-            <artifactId>moneta</artifactId>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics </artifactId>
+            <version>${jfx.version}</version>
+            <classifier>win</classifier>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics </artifactId>
+            <version>${jfx.version}</version>
+            <classifier>linux</classifier>
+        </dependency>
+<!--        
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics </artifactId>
+            <version>${jfx.version}</version>
+            <classifier>mac</classifier>
+        </dependency>
+-->
+
+        <dependency>
+            <groupId>org.javamoney.moneta</groupId>
+            <artifactId>moneta-core</artifactId>
             <version>${money.version}</version>
         </dependency>
         
@@ -57,6 +83,18 @@
             <version>${jfoenix.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>${jasper.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.34.0</version>
+        </dependency>
+
     </dependencies>
     
     
@@ -71,12 +109,36 @@
                 <configuration>
                     <mainClass>space.redoak.amfx.App</mainClass>
                     <options>
-                        <option>--enable-preview</option>
+<!--                        <option>-enable-preview</option>-->
                         <option>--add-opens java.base/java.lang.reflect=com.jfoenix</option>
                         <option>--add-opens javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix</option>
                         <option>--add-opens javafx.base/com.sun.javafx.binding=com.jfoenix</option>
                         <option>--add-opens javafx.graphics/com.sun.javafx.stage=com.jfoenix</option>
                         <option>--add-opens javafx.base/com.sun.javafx.event=com.jfoenix</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/javafx.css=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.base/com.sun.javafx.runtime=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.base/com.sun.javafx.binding=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.base/com.sun.javafx.event=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED</option>
+                        <option>--add-exports</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.base/com.sun.javafx.binding=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.graphics/com.sun.javafx.stage=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.base/com.sun.javafx.event=com.jfoenix</option>
                     </options>
                 </configuration>
                 <executions>
@@ -92,12 +154,36 @@
                         <configuration>
                             <options>
                                 <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:8000</option>
-                                <option>--enable-preview</option>
+<!--                                <option>-enable-preview</option>-->
                                 <option>--add-opens java.base/java.lang.reflect=com.jfoenix</option>
                                 <option>--add-opens javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix</option>
                                 <option>--add-opens javafx.base/com.sun.javafx.binding=com.jfoenix</option>
                                 <option>--add-opens javafx.graphics/com.sun.javafx.stage=com.jfoenix</option>
                                 <option>--add-opens javafx.base/com.sun.javafx.event=com.jfoenix</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/javafx.css=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.base/com.sun.javafx.runtime=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.base/com.sun.javafx.binding=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.base/com.sun.javafx.event=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED</option>
+                        <option>--add-exports</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.base/com.sun.javafx.binding=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.graphics/com.sun.javafx.stage=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.base/com.sun.javafx.event=com.jfoenix</option>
                             </options>
                         </configuration>
                     </execution>
@@ -107,12 +193,36 @@
                         <configuration>
                             <options>
                                 <option>-agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=${jpda.address}</option>
-                                <option>--enable-preview</option>
+<!--                                <option>-enable-preview</option>-->
                                 <option>--add-opens java.base/java.lang.reflect=com.jfoenix</option>
                                 <option>--add-opens javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix</option>
                                 <option>--add-opens javafx.base/com.sun.javafx.binding=com.jfoenix</option>
                                 <option>--add-opens javafx.graphics/com.sun.javafx.stage=com.jfoenix</option>
                                 <option>--add-opens javafx.base/com.sun.javafx.event=com.jfoenix</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/javafx.css=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.base/com.sun.javafx.runtime=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.base/com.sun.javafx.binding=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.base/com.sun.javafx.event=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED</option>
+                        <option>--add-exports</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.controls/com.sun.javafx.scene.control=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.base/com.sun.javafx.binding=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.graphics/com.sun.javafx.stage=com.jfoenix</option>
+                        <option>--add-exports</option>
+                        <option>javafx.base/com.sun.javafx.event=com.jfoenix</option>
                             </options>
                             <mainClass>space.redoak.amfx.App</mainClass>
                         </configuration>
@@ -139,9 +249,9 @@
                 <version>3.8.1</version>
                 <configuration>
                     <release>${java.version}</release>
-                    <compilerArgs>
-                        <arg>--enable-preview</arg>
-                    </compilerArgs>
+<!--                    <compilerArgs>
+                        <arg>-enable-preview</arg>
+                    </compilerArgs>-->
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -151,7 +261,37 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-            
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>space.redoak.amfx.AppWrapper</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
         
     </build>

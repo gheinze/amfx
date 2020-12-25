@@ -72,6 +72,17 @@
     -fx-text-fill: -fx-secondary-text;
 }
 
+/*
+ ************
+ * TOGGLE
+ ************
+*/
+
+.jfx-toggle-button {
+    -fx-text-fill: -fx-prompt-text;
+
+}
+
 
 /*
  ************
@@ -86,17 +97,23 @@
 
 /* Sets the background colour of the tab bar */
 .tab-pane .tab-header-background {
-    -fx-background-color: -fx-secondary-text;
+    -fx-background-color: #37474F;
 }
 
 /* Change the colour of the selected tab header background (match pane background)*/
+.tab-pane .tab {
+    -fx-background-color: #37474F;
+}
 .tab-pane .tab:selected {
     -fx-background-color: -fx-primary-fill;
 }
 
 /* Change the colour of the tab header text of the selected tab */
-.tab:selected .tab-label { 
+.tab .tab-label { 
     -fx-alignment: CENTER;
+    -fx-text-fill: -fx-prompt-text;
+}
+.tab:selected .tab-label { 
     -fx-text-fill: -fx-primary-text;
 }
 
