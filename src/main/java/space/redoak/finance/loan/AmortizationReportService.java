@@ -24,11 +24,11 @@ public class AmortizationReportService {
     private static final int MONTHS_PER_YEAR = 12;
 
 
-public File generatePdfSchedule(final AmortizationAttributes amAttrs) throws JRException, IOException {
+public File generatePdfSchedule(final AmortizationAttributes amAttrs, String preparedFor, String preparedBy) throws JRException, IOException {
 
         List<ScheduledPayment> payments = AmortizationCalculator.generateSchedule(amAttrs);
 
-        // TODO: name, title, etc should be configurable parameters as well
+        // TODO: name, title, etc should be configurable parameters as well        
         Map<String, Object> customParameters = new HashMap<>();
         customParameters.put("amount", amAttrs.getLoanAmount());
         customParameters.put("rate", amAttrs.getInterestRateAsPercent());
@@ -45,8 +45,8 @@ public File generatePdfSchedule(final AmortizationAttributes amAttrs) throws JRE
                     TimePeriod.getTimePeriodWithPeriodCountOf(amAttrs.getCompoundingPeriodsPerYear()).getDisplayName()
             );
         }
-        customParameters.put("mortgagee", "Accounted4");
-        customParameters.put("mortgagor", "Accounted4");
+        customParameters.put("mortgagee", preparedBy);
+        customParameters.put("mortgagor", preparedFor);
 
         return writePdfScheduleToFile(AMORTIZATION_SCHEDULE_REPORT, payments, customParameters);
 

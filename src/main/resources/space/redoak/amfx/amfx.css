@@ -74,6 +74,30 @@
 
 /*
  ************
+ * DATEPICKER
+ ************
+https://github.com/jfoenixadmin/JFoenix/issues/625
+*/
+
+/* Sets the circular background colour of the month toggle */
+.date-picker-popup .left-button,
+.date-picker-popup .right-button {
+    -fx-background-color: WHITE;
+}
+
+/* Sets the arrow colour within the circular month toggle */
+.date-picker-popup .left-button .jfx-svg-glyph,
+.date-picker-popup .right-button .jfx-svg-glyph {
+    -fx-background-color: TEAL;
+}
+
+/* Set the prompt as the label when populated */
+.jfx-date-picker > .jfx-text-field {
+    -jfx-label-float: true;
+}
+
+/*
+ ************
  * TOGGLE
  ************
 */

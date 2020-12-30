@@ -22,26 +22,25 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javax.money.MonetaryAmount;
-import javax.money.format.AmountFormatQuery;
 import javax.money.format.AmountFormatQueryBuilder;
 import javax.money.format.MonetaryAmountFormat;
 import javax.money.format.MonetaryFormats;
 import net.sf.jasperreports.engine.JRException;
 import org.javamoney.moneta.Money;
-import org.javamoney.moneta.format.AmountFormatParams;
 import org.javamoney.moneta.format.CurrencyStyle;
 import space.redoak.finance.loan.AmortizationAttributes;
 import space.redoak.finance.loan.AmortizationCalculator;
 import space.redoak.finance.loan.ScheduledPayment;
 import space.redoak.finance.loan.TimePeriod;
 import space.redoak.finance.loan.AmortizationReportService;
+import space.redoak.util.TableCutAndPaste;
 
 
 
@@ -147,6 +146,7 @@ public class LoanTermsController  {
         
         setNumericChangeListener(paymentOverrideJfxTextField, CURRENCY_PATTERN, -1, false);
         paymentOverrideJfxTextField.focusedProperty().addListener((o) -> {
+            scheduleTable.setVisible(false);
             if (!paymentOverrideJfxTextField.getText().isBlank()) {
                 setPaymentOverride();
             }
@@ -203,7 +203,9 @@ public class LoanTermsController  {
     @FXML
     private void pdfButtonClicked() throws JRException, IOException {
         AmortizationReportService service = new AmortizationReportService();
-        File file = service.generatePdfSchedule(getAmAttributes());
+        String preparedFor = preparedForJfxTextField.getText().isBlank() ? "Accounted4" : preparedForJfxTextField.getText();
+        String preparedBy = preparedByJfxTextField.getText().isBlank() ? "Accounted4" : preparedByJfxTextField.getText();
+        File file = service.generatePdfSchedule(getAmAttributes(), preparedFor, preparedBy);
         App.hostServices.showDocument(file.toURI().toString());
         
     }
@@ -314,12 +316,20 @@ public class LoanTermsController  {
     
     
     private void prepareScheduleTable() {
+        
         scheduleTable.setVisible(false);
+        
         paymentColumn.setCellValueFactory(param -> param.getValue().payment);
         dateColumn.setCellValueFactory(param -> param.getValue().date);
         interestColumn.setCellValueFactory(param -> param.getValue().interest);
         principalColumn.setCellValueFactory(param -> param.getValue().principal);
-        balanceColumn.setCellValueFactory(param -> param.getValue().balance);        
+        balanceColumn.setCellValueFactory(param -> param.getValue().balance);
+        
+        scheduleTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        scheduleTable.getSelectionModel().setCellSelectionEnabled(true);
+        TableCutAndPaste.installCopyPasteHandler(scheduleTable);
+        
+
     }
     
     
