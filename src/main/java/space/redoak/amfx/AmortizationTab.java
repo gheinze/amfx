@@ -2,7 +2,6 @@ package space.redoak.amfx;
 
 
 import java.io.IOException;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.Pane;
 
@@ -18,8 +17,8 @@ public class AmortizationTab extends Tab {
     
     public AmortizationTab() throws IOException {
         super("AmSched " + tabNumber++);
-//        Pane mortgageAttributePane =  FXMLLoader.load(getClass().getResource("/space/redoak/amfx/mortgageAmountForm.fxml"));
-        Pane mortgageAttributePane =  FXMLLoader.load(getClass().getResource("/space/redoak/amfx/loanTerms.fxml"));
+//        Pane mortgageAttributePane =  FXMLLoader.load(getClass().getResource("/space/redoak/amfx/loanTerms.fxml"));
+        Pane mortgageAttributePane =  (Pane)App.loadFXML("loanTerms");
         this.setContent(mortgageAttributePane);
     }
     

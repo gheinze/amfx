@@ -35,6 +35,9 @@ import javax.money.format.MonetaryFormats;
 import net.sf.jasperreports.engine.JRException;
 import org.javamoney.moneta.Money;
 import org.javamoney.moneta.format.CurrencyStyle;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import space.redoak.finance.loan.AmortizationAttributes;
 import space.redoak.finance.loan.AmortizationCalculator;
 import space.redoak.finance.loan.ScheduledPayment;
@@ -43,7 +46,8 @@ import space.redoak.finance.loan.AmortizationReportService;
 import space.redoak.util.TableCutAndPaste;
 
 
-
+@Component
+@Scope("prototype")
 public class LoanTermsController  {
 
     @FXML
@@ -134,6 +138,8 @@ public class LoanTermsController  {
     );
 
 
+    @Autowired AmortizationCalculator amortizationCalculator;
+    @Autowired AmortizationReportService amReportService;
     
     
     @FXML
@@ -190,7 +196,7 @@ public class LoanTermsController  {
     
     @FXML
     private void scheduleButtonClicked() {
-        List<ScheduledPayment> schedule = AmortizationCalculator.generateSchedule(getAmAttributes());
+        List<ScheduledPayment> schedule = amortizationCalculator.generateSchedule(getAmAttributes());
         List<RowData> observableCollection = schedule.stream()
                 .map(s -> new RowData(s))
                 .collect(Collectors.toList());
@@ -202,10 +208,9 @@ public class LoanTermsController  {
     
     @FXML
     private void pdfButtonClicked() throws JRException, IOException {
-        AmortizationReportService service = new AmortizationReportService();
         String preparedFor = preparedForJfxTextField.getText().isBlank() ? "Accounted4" : preparedForJfxTextField.getText();
         String preparedBy = preparedByJfxTextField.getText().isBlank() ? "Accounted4" : preparedByJfxTextField.getText();
-        File file = service.generatePdfSchedule(getAmAttributes(), preparedFor, preparedBy);
+        File file = amReportService.generatePdfSchedule(getAmAttributes(), preparedFor, preparedBy);
         App.hostServices.showDocument(file.toURI().toString());
         
     }
@@ -383,7 +388,7 @@ public class LoanTermsController  {
             paymentOverrideJfxTextField.setText("");
         } else {
             
-            periodicPayment = AmortizationCalculator.getPeriodicPayment(getAmAttributes());
+            periodicPayment = amortizationCalculator.getPeriodicPayment(getAmAttributes());
             
             String customFormatted = currencyFormatter.format(periodicPayment);
             paymentLabel.setText(customFormatted);

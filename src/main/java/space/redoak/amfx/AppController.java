@@ -3,7 +3,9 @@ package space.redoak.amfx;
 import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.scene.control.TabPane;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AppController {
 
     @FXML

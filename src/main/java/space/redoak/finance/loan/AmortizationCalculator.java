@@ -8,6 +8,7 @@ import java.util.List;
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import javax.money.MonetaryOperator;
+import org.springframework.stereotype.Service;
 import space.redoak.finance.math.AnyUpMonetaryRounder;
 import space.redoak.finance.math.HalfUpMonetaryRounder;
 
@@ -15,6 +16,7 @@ import space.redoak.finance.math.HalfUpMonetaryRounder;
  *
  * @author glenn
  */
+@Service
 public class AmortizationCalculator {
 
     private static final int STANDARD_DAYS_IN_A_YEAR = 365; // 366 in leap year
@@ -24,12 +26,8 @@ public class AmortizationCalculator {
     private static final MonetaryOperator HALF_UP_ROUNDING_MODE = new HalfUpMonetaryRounder();
 
 
-    // Container for library methods, so should not be instantiated
-    private AmortizationCalculator() {
-    }
 
-
-    public static MonetaryAmount getPeriodicPayment(AmortizationAttributes amAttrs) {
+    public MonetaryAmount getPeriodicPayment(AmortizationAttributes amAttrs) {
         return amAttrs.isInterestOnly() ?
                 getInterestOnlyPeriodicPayment(amAttrs) :
                 getAmortizedPeriodicPayment(amAttrs)
@@ -37,7 +35,7 @@ public class AmortizationCalculator {
     }
 
 
-    private static MonetaryAmount getInterestOnlyPeriodicPayment(AmortizationAttributes amAttrs) {
+    private MonetaryAmount getInterestOnlyPeriodicPayment(AmortizationAttributes amAttrs) {
         MonetaryAmount loanAmount = amAttrs.getLoanAmount();
         double interestRateAsDecimal = amAttrs.getInterestRateAsPercent() / 100.;
         int paymentFrequency = amAttrs.getPaymentFrequency();
@@ -56,7 +54,7 @@ public class AmortizationCalculator {
      * See: https://en.wikipedia.org/wiki/Mortgage_calculator#Monthly_payment_formula
      *
      */
-    private static MonetaryAmount getAmortizedPeriodicPayment(AmortizationAttributes amAttrs) {
+    private MonetaryAmount getAmortizedPeriodicPayment(AmortizationAttributes amAttrs) {
 
         double loanAmount = amAttrs.getLoanAmount().getNumber().doubleValueExact();
         double periodRate = getPeriodRateAsDecimal(amAttrs);
@@ -86,7 +84,7 @@ public class AmortizationCalculator {
      *
      * See: http://www.vertex42.com/ExcelArticles/amortization-calculation.html
      */
-    private static double getPeriodRateAsDecimal(AmortizationAttributes amAttrs) {
+    private double getPeriodRateAsDecimal(AmortizationAttributes amAttrs) {
         double i = amAttrs.getInterestRateAsPercent() / 100.;
         double c = (double)amAttrs.getCompoundingPeriodsPerYear();
         double p = (double)amAttrs.getPaymentFrequency();
@@ -94,7 +92,7 @@ public class AmortizationCalculator {
     }
 
 
-    public static MonetaryAmount getPerDiem(MonetaryAmount amount, double annualInterestRatePercent) {
+    public MonetaryAmount getPerDiem(MonetaryAmount amount, double annualInterestRatePercent) {
         return amount.multiply(annualInterestRatePercent * 0.01 / STANDARD_DAYS_IN_A_YEAR).with(ANY_UP_ROUNDING_MODE);
     }
 
@@ -104,20 +102,20 @@ public class AmortizationCalculator {
      * @param amAttrs
      * @return
      */
-    public static MonetaryAmount getPeriodInterest(AmortizationAttributes amAttrs) {
+    public MonetaryAmount getPeriodInterest(AmortizationAttributes amAttrs) {
         return amAttrs.isInterestOnly() ?
                 getInterestOnlyPeriodicPayment(amAttrs) :
                 getAmortizedPeriodInterest(amAttrs)
                 ;
     }
 
-    private static MonetaryAmount getAmortizedPeriodInterest(AmortizationAttributes amAttrs) {
+    private MonetaryAmount getAmortizedPeriodInterest(AmortizationAttributes amAttrs) {
         double periodicRate = getPeriodRateAsDecimal(amAttrs);
         return amAttrs.getLoanAmount().multiply(periodicRate).with(HALF_UP_ROUNDING_MODE);
     }
 
 
-    public static List<ScheduledPayment> generateSchedule(AmortizationAttributes amAttrs) {
+    public List<ScheduledPayment> generateSchedule(AmortizationAttributes amAttrs) {
         return amAttrs.isInterestOnly() ?
                 generateInterestOnlySchedule(amAttrs) :
                 generateAmortizedSchedule(amAttrs)
@@ -144,11 +142,11 @@ public class AmortizationCalculator {
     }
 
     
-    private static ScheduledPayment getAdjusmentPayment(AmortizationAttributes amAttrs) {
+    private ScheduledPayment getAdjusmentPayment(AmortizationAttributes amAttrs) {
         
         long days = amAttrs.getStartDate().until(amAttrs.getAdjustmentDate(), ChronoUnit.DAYS);
         
-        MonetaryAmount perDiem = AmortizationCalculator.getPerDiem(
+        MonetaryAmount perDiem = getPerDiem(
                 amAttrs.getLoanAmount(),
                 amAttrs.getInterestRateAsPercent()
         ).multiply(days);
@@ -167,7 +165,7 @@ public class AmortizationCalculator {
     /* Any item in the list of interest only scheduled payments can be computed without
      * reliance on previous items in the list.
     */
-    private static List<ScheduledPayment> generateInterestOnlySchedule(AmortizationAttributes amAttrs) {
+    private List<ScheduledPayment> generateInterestOnlySchedule(AmortizationAttributes amAttrs) {
 
         return new AbstractList<ScheduledPayment>() {
 
@@ -206,7 +204,7 @@ public class AmortizationCalculator {
 
     /* An amortized list of payments will all be pre-computed.
     */
-    private static List<ScheduledPayment> generateAmortizedSchedule(AmortizationAttributes amAttrs) {
+    private List<ScheduledPayment> generateAmortizedSchedule(AmortizationAttributes amAttrs) {
 
         List<ScheduledPayment> schedule = new ArrayList<>();
         
@@ -246,19 +244,19 @@ public class AmortizationCalculator {
     }
 
 
-    private static int getNumberOfExpectedPayments(AmortizationAttributes amAttrs) {
+    private int getNumberOfExpectedPayments(AmortizationAttributes amAttrs) {
         return (int) Math.ceil(amAttrs.getPaymentFrequency() * amAttrs.getTermInMonths() / 12.);
     }
 
 
-    private static MonetaryAmount getActualPayment(AmortizationAttributes amAttrs) {
+    private MonetaryAmount getActualPayment(AmortizationAttributes amAttrs) {
         return null == amAttrs.getRegularPayment() ?
             getPeriodicPayment(amAttrs) :
             amAttrs.getRegularPayment();
     }
 
 
-    private static ScheduledPayment getTemplatePayment(int paymentNumber, int totalPayments, AmortizationAttributes amAttrs) {
+    private ScheduledPayment getTemplatePayment(int paymentNumber, int totalPayments, AmortizationAttributes amAttrs) {
 
         if (paymentNumber < 1 || paymentNumber > totalPayments) {
             throw new IndexOutOfBoundsException(String.format("Payment number %d outside of schedule range 1 - %d", paymentNumber, totalPayments));
@@ -272,7 +270,7 @@ public class AmortizationCalculator {
     }
 
 
-    private static LocalDate getPaymentDateFrom(int paymentNumber, AmortizationAttributes amAttrs) {
+    private LocalDate getPaymentDateFrom(int paymentNumber, AmortizationAttributes amAttrs) {
         LocalDate scheduleStartDate = amAttrs.getAdjustmentDate();
         int paymentFrequency = amAttrs.getPaymentFrequency();
         TimePeriod timePeriod = TimePeriod.getTimePeriodWithPeriodCountOf(paymentFrequency);

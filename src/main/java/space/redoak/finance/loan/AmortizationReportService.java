@@ -12,21 +12,28 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import space.redoak.util.JasperReportRegistry;
 
 /**
  *
  * @author glenn
  */
+@Service
 public class AmortizationReportService {
 
     private static final String AMORTIZATION_SCHEDULE_REPORT = "/space/redoak/finance/loan/AmortizationSchedule.jasper";
     private static final int MONTHS_PER_YEAR = 12;
 
 
+@Autowired
+AmortizationCalculator amCalculator;
+
+
 public File generatePdfSchedule(final AmortizationAttributes amAttrs, String preparedFor, String preparedBy) throws JRException, IOException {
 
-        List<ScheduledPayment> payments = AmortizationCalculator.generateSchedule(amAttrs);
+        List<ScheduledPayment> payments = amCalculator.generateSchedule(amAttrs);
 
         // TODO: name, title, etc should be configurable parameters as well        
         Map<String, Object> customParameters = new HashMap<>();
@@ -34,7 +41,7 @@ public File generatePdfSchedule(final AmortizationAttributes amAttrs, String pre
         customParameters.put("rate", amAttrs.getInterestRateAsPercent());
 
         MonetaryAmount requestedMonthlyPayment = amAttrs.getRegularPayment();
-        MonetaryAmount periodicPayment = (null == requestedMonthlyPayment) ? AmortizationCalculator.getPeriodicPayment(amAttrs) : requestedMonthlyPayment;
+        MonetaryAmount periodicPayment = (null == requestedMonthlyPayment) ? amCalculator.getPeriodicPayment(amAttrs) : requestedMonthlyPayment;
         customParameters.put("monthlyPayment", periodicPayment);
 
         customParameters.put("term", amAttrs.getTermInMonths());
