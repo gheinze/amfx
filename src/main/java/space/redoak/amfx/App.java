@@ -28,6 +28,28 @@ public class App extends Application {
     private static Scene scene;
     public static HostServices hostServices;
 
+    
+    public static Object createControllerForType(Class type) {
+        return context.getBean(type);
+    }
+      
+    
+    public static Parent loadFXML(String fxml) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+        fxmlLoader.setControllerFactory(type -> createControllerForType(type));
+        return fxmlLoader.load();
+    }
+
+    
+    public static void main(String[] args) {
+        savedArgs=args;
+        launch();
+    }
+
+
+
+    // ---------------------
+    
     @Override
     public void init() throws Exception {
         this.context = SpringApplication.run(App.class, savedArgs);
@@ -41,11 +63,6 @@ public class App extends Application {
     }    
 
 
-    public static Object createControllerForType(Class type) {
-        return context.getBean(type);
-    }
-      
-    
     @Override
     public void start(Stage stage) throws IOException {
         scene = new Scene(loadFXML("app"), 1200, 600);
@@ -57,15 +74,7 @@ public class App extends Application {
     }
 
 
-    public static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-        fxmlLoader.setControllerFactory(type -> createControllerForType(type));
-        return fxmlLoader.load();
-    }
 
-    public static void main(String[] args) {
-        savedArgs=args;
-        launch();
-    }
+
 
 }

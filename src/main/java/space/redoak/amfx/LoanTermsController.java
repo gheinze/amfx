@@ -334,7 +334,6 @@ public class LoanTermsController  {
         scheduleTable.getSelectionModel().setCellSelectionEnabled(true);
         TableCutAndPaste.installCopyPasteHandler(scheduleTable);
         
-
     }
     
     
@@ -504,6 +503,7 @@ public class LoanTermsController  {
             this.principal = new SimpleStringProperty(currencyFormatter.format(payment.getPrincipal()));
             this.balance = new SimpleStringProperty(currencyFormatter.format(payment.getBalance()));
         }
+        
     }
     
 }

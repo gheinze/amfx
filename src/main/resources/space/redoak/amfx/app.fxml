@@ -6,12 +6,12 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-
 <BorderPane stylesheets="@amfx.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="space.redoak.amfx.AppController">
    <left>
       <VBox alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
          <children>
             <Button id="mortCalcButton" mnemonicParsing="false" onMouseClicked="#openMtgCalcTab" text="Mortgage Calculator" />
+            <Button mnemonicParsing="false" onMouseClicked="#openDebentureTab" text="Debentures" />
          </children>
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
