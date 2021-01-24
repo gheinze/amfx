@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import javafx.scene.layout.StackPane;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,6 +29,7 @@ public class App extends Application {
     private static Scene scene;
     public static HostServices hostServices;
 
+    public static StackPane appStackPane;
     
     public static Object createControllerForType(Class type) {
         return context.getBean(type);
@@ -65,7 +67,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("app"), 1200, 600);
+        appStackPane = (StackPane)loadFXML("app");
+        scene = new Scene(appStackPane, 1200, 600);
         scene.getStylesheets().add(getClass().getResource("amfx.css").toExternalForm());
         stage.setScene(scene);
         stage.setTitle("Asset Manager");

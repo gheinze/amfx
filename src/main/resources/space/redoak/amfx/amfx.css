@@ -182,6 +182,14 @@ https://github.com/jfoenixadmin/JFoenix/issues/625
 }
 
 
+.button .glyph-icon {
+    -fx-fill: -fx-primary-text;
+}
+
+.button:hover .glyph-icon {
+    -fx-fill: -fx-primary-fill;
+}
+
 
 /*
   This sets the colour of the items in the drop down list

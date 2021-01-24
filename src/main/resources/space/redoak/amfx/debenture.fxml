@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXDatePicker?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import com.jfoenix.controls.JFXToggleButton?>
+<?import de.jensd.fx.glyphs.materialicons.MaterialIconView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="debentureDetail" prefHeight="552.0" prefWidth="1763.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="space.redoak.amfx.DebentureController">
+<BorderPane fx:id="debentureDetail" prefHeight="552.0" prefWidth="1763.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="space.redoak.amfx.DebentureController">
    <center>
       <ScrollPane fitToHeight="true" fitToWidth="true">
          <content>
@@ -44,4 +51,30 @@
          </content>
       </ScrollPane>
    </center>
+   <top>
+      <ToolBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <items>
+            <JFXToggleButton fx:id="detailToggle" onAction="#handleToggle" prefHeight="24.0" prefWidth="118.0" text="Editor" />
+            <JFXButton disable="true" text="Edit Row">
+               <graphic>
+                  <MaterialIconView glyphName="EDIT" size="16" />
+               </graphic>
+            </JFXButton>
+        </items>
+      </ToolBar>
+   </top>
+   <bottom>
+      <AnchorPane fx:id="detailPane" prefHeight="200.0" prefWidth="200.0" visible="false" BorderPane.alignment="CENTER">
+         <children>
+            <JFXTextField fx:id="detailInterestRate" labelFloat="true" layoutX="32.0" layoutY="18.0" promptText="Interest Rate" />
+            <JFXDatePicker layoutX="32.0" layoutY="62.0" promptText="Maturity Date" />
+            <JFXTextField labelFloat="true" layoutX="264.0" layoutY="18.0" promptText="Underlying Symbol" />
+            <JFXTextField labelFloat="true" layoutX="264.0" layoutY="64.0" promptText="Conversion" />
+            <JFXTextField labelFloat="true" layoutX="495.0" layoutY="18.0" prefHeight="26.0" prefWidth="280.0" promptText="Prospectus" />
+            <JFXTextField labelFloat="true" layoutX="495.0" layoutY="64.0" prefHeight="26.0" prefWidth="281.0" promptText="Comments" />
+            <JFXButton fx:id="saveButton" layoutX="868.0" layoutY="20.0" onAction="#handleSave" text="Save" />
+            <JFXButton fx:id="revertButton" layoutX="868.0" layoutY="51.0" onAction="#handleRevert" text="Revert" />
+         </children>
+      </AnchorPane>
+   </bottom>
 </BorderPane>
