@@ -1,12 +1,10 @@
 package space.redoak.amfx;
 
-import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXToggleButton;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -14,6 +12,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -40,18 +39,11 @@ import space.redoak.util.TableCutAndPaste;
 
 public class DebentureController {
 
-    private static final ThreadLocal<DecimalFormat> INTEREST_FORMATTER = ThreadLocal.withInitial(() -> new DecimalFormat("##.000"));
-    private static final ThreadLocal<DecimalFormat> MONEY_FORMATTER    = ThreadLocal.withInitial(() -> new DecimalFormat("###,###.00"));
-    private static final ThreadLocal<DecimalFormat> INTEGER_FORMATTER  = ThreadLocal.withInitial(() -> new DecimalFormat("###,###,###"));
-
-    private final static Pattern INTEREST_PATTERN         = Pattern.compile("^\\d{1,2}(\\.\\d{0,3})?$");
-    private final static Pattern CURRENCY_PATTERN         = Pattern.compile("^\\d{1,8}(\\.\\d{0,2})?$");
-    private final static Pattern DOUBLE_DIGIT_INT_PATTERN = Pattern.compile("^\\d{1,2}$");
-
+    
     private final StringConverter<Float> interestStringConverter = new StringConverter<>() {
         @Override
         public String toString​(Float object) {
-            return nullSafeDecimalFormat(object, INTEREST_FORMATTER);
+            return Formats.Interest.nullSafeFormat(object);
         }
 
         @Override
@@ -61,6 +53,36 @@ public class DebentureController {
             } catch (Exception ex) {
                 return null;
             }
+        }
+    };
+
+    
+    private final StringConverter<Float> moneyStringConverter = new StringConverter<>() {
+        @Override
+        public String toString​(Float object) {
+            return Formats.Money.nullSafeFormat(object);
+        }
+
+        @Override
+        public Float fromString​(String string) {
+            try {
+                return Float.valueOf(string);
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+    };
+
+    
+    private final StringConverter<Object> hyperlinkStringConverter = new StringConverter<>() {
+        @Override
+        public String toString​(Object object) {
+            return ((Hyperlink)object).textProperty().getValue();
+        }
+
+        @Override
+        public Object fromString​(String string) {
+            return Debenture.createHyperlinkOrText(string);
         }
     };
 
@@ -83,15 +105,18 @@ public class DebentureController {
     @FXML private TableColumn<Debenture, Float> conversionPriceColumn;
     @FXML private TableColumn<Debenture, Float> conversionRateColumn;
     @FXML private TableColumn<Debenture, Float> convertedColumn;
-    @FXML private TableColumn<Debenture, Hyperlink> prospectusColumn;
+    @FXML private TableColumn<Debenture, Object> prospectusColumn;
     @FXML private TableColumn<Debenture, String> commentsColumn;
     
     @FXML private JFXToggleButton detailToggle;
     @FXML private AnchorPane detailPane;
     @FXML private JFXTextField detailInterestRate;
-    @FXML private JFXButton saveButton;
-    @FXML private JFXButton revertButton;
-
+    @FXML private Label detailSymbolLabel;
+    @FXML private JFXDatePicker detailMaturityDate;
+    @FXML private JFXTextField detailUnderlyingSymbol;
+    @FXML private JFXTextField detailConversionPrice;
+    @FXML private JFXTextField detailProspectus;
+    @FXML private JFXTextField detailComments;
         
         
     private DebentureTableModel debentureTableModel;
@@ -104,10 +129,11 @@ public class DebentureController {
         prepareDebentureTable();
         populateDebentureTable();
         prepareToolBar();
-        prepareDetailPaneFields();
+        prepareDetailPane();
         detailPane.setVisible(false);
         detailPane.setManaged(false);
     }
+    
     
     public void prepareDebentureTable() {
         
@@ -115,36 +141,36 @@ public class DebentureController {
         descriptionColumn.setCellValueFactory(row -> row.getValue().descriptionProperty());
         
         parRateColumn.setCellValueFactory(row -> row.getValue().percentageProperty());
-        parRateColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> nullSafeDecimalFormat(value, INTEREST_FORMATTER));
+        parRateColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> Formats.Interest.nullSafeFormat(value));
         
         effectiveRateColumn.setCellValueFactory(row -> row.getValue().effectiveRateProperty());
-        effectiveRateColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> nullSafeDecimalFormat(value, INTEREST_FORMATTER));
+        effectiveRateColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> Formats.Interest.nullSafeFormat(value));
 
         maturityColumn.setCellValueFactory(row -> row.getValue().maturityDateProperty());
         
         closeColumn.setCellValueFactory(row -> row.getValue().closePriceProperty());
-        closeColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> nullSafeDecimalFormat(value, MONEY_FORMATTER));
+        closeColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> Formats.Money.nullSafeFormat(value));
 
         volumeColumn.setCellValueFactory(row -> row.getValue().volumeProperty());
-        volumeColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Integer>) value -> nullSafeDecimalFormat(value, INTEGER_FORMATTER));
+        volumeColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Integer>) value -> Formats.Integer.nullSafeFormat(value));
 
         dateColumn.setCellValueFactory(row -> row.getValue().readDateProperty());
         
         underlyingSymbolColumn.setCellValueFactory(row -> row.getValue().underlyingSymbolProperty());
         
         underlyingClosePriceColumn.setCellValueFactory(row -> row.getValue().underlyingClosePriceProperty());
-        underlyingClosePriceColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> nullSafeDecimalFormat(value, MONEY_FORMATTER));
+        underlyingClosePriceColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> Formats.Money.nullSafeFormat(value));
         
         underlyingReadDateColumn.setCellValueFactory(row -> row.getValue().underlyingReadDateProperty());
 
         conversionPriceColumn.setCellValueFactory(row -> row.getValue().conversionPriceProperty());
-        conversionPriceColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> nullSafeDecimalFormat(value, MONEY_FORMATTER));
+        conversionPriceColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> Formats.Money.nullSafeFormat(value));
 
         conversionRateColumn.setCellValueFactory(row -> row.getValue().conversionRateProperty());
-        conversionRateColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> nullSafeDecimalFormat(value, INTEREST_FORMATTER));
+        conversionRateColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> Formats.Interest.nullSafeFormat(value));
 
         convertedColumn.setCellValueFactory(row -> row.getValue().convertedProperty());
-        convertedColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> nullSafeDecimalFormat(value, MONEY_FORMATTER));
+        convertedColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> Formats.Money.nullSafeFormat(value));
 
         prospectusColumn.setCellValueFactory(row -> row.getValue().prospectusProperty());
         
@@ -157,29 +183,38 @@ public class DebentureController {
     }
 
 
-    private boolean recordModified = false;
-    private String cachedInterestRate;
-    
-    private ChangeListener<Debenture> debentureListener = (ObservableValue<? extends Debenture> obs, Debenture oldDebenture, Debenture newDebenture) -> {
+    private ChangeListener<Debenture> debentureChangeListener = (ObservableValue<? extends Debenture> obs, Debenture oldDebenture, Debenture newDebenture) -> {
 
+        // Remove detail pane bindings from the previously selected debenture that was in the table
         if (oldDebenture != null) {
             detailInterestRate.textProperty().unbindBidirectional(oldDebenture.percentageProperty());
+            //detailMaturityDate;
+            detailUnderlyingSymbol.textProperty().unbindBidirectional(oldDebenture.underlyingSymbolProperty());
+            detailConversionPrice.textProperty().unbindBidirectional(oldDebenture.conversionPriceProperty());
+            detailProspectus.textProperty().unbindBidirectional(oldDebenture.prospectusProperty());
+            detailComments.textProperty().unbindBidirectional(oldDebenture.commentsProperty());
+            
+            
         }
 
+        // If there is no debenture selected, nothing should go into the detail pane
         if (newDebenture == null) {
             detailInterestRate.clear();
+            //detailMaturityDate;
+            detailUnderlyingSymbol.clear();
+            detailConversionPrice.clear();
+            detailProspectus.clear();
+            detailComments.clear();
+           
+        // Bind the detail pane to the selected debenture in the table
         } else {
+            Bindings.bindBidirectional(detailSymbolLabel.textProperty(), newDebenture.symbolProperty());
             Bindings.bindBidirectional(detailInterestRate.textProperty(), newDebenture.percentageProperty(), interestStringConverter);
-            recordModified = false;
-            cachedInterestRate = detailInterestRate.textProperty().get();
-            saveButton.disableProperty().bind(
-                Bindings.createBooleanBinding(() -> {
-                    return cachedInterestRate.equals(detailInterestRate.textProperty().get());
-                },
-                detailInterestRate.textProperty()
-            ));
-            revertButton.disableProperty().bind(saveButton.disableProperty());
-
+            Bindings.bindBidirectional(detailMaturityDate.valueProperty(), newDebenture.maturityDateProperty());
+            Bindings.bindBidirectional(detailUnderlyingSymbol.textProperty(), newDebenture.underlyingSymbolProperty());
+            Bindings.bindBidirectional(detailConversionPrice.textProperty(), newDebenture.conversionPriceProperty(), moneyStringConverter);
+            Bindings.bindBidirectional(detailProspectus.textProperty(), newDebenture.prospectusProperty(), hyperlinkStringConverter);
+            Bindings.bindBidirectional(detailComments.textProperty(), newDebenture.commentsProperty());
         }
         
     };
@@ -194,7 +229,7 @@ public class DebentureController {
                 ;
         
         debentureTableModel = new DebentureTableModel(debentureList);
-        debentureTableModel.currentDebentureProperty().addListener(debentureListener);
+        debentureTableModel.currentDebentureProperty().addListener(debentureChangeListener);
         debentureTable.setItems(debentureTableModel.getDebentureList());
         
         //debentureTable.setVisible(true);   
@@ -210,22 +245,25 @@ public class DebentureController {
     }
     
     
-    private String nullSafeDecimalFormat(Number val, ThreadLocal<DecimalFormat> threadSafeFormatter) {
-        return null == val ? "" : threadSafeFormatter.get().format(val);
-    }
-
-    
-    private void prepareDetailPaneFields() {
+    private void prepareDetailPane() {
         
         detailInterestRate.textProperty().addListener(
                 (var observable, var oldValue, var newValue) -> {
                     if (newValue.isBlank()) {
                         detailInterestRate.setText("");
-                    } else if (!INTEREST_PATTERN.matcher(newValue).matches()) {
+                    } else if (!Formats.Interest.getPattern().matcher(newValue).matches()) {
                         detailInterestRate.setText(oldValue);
                     }
                 }
         );
+        
+        
+        detailInterestRate.focusedProperty().addListener(
+                (obs, oldVal, newVal)
+                -> { if (!newVal) { System.out.println("Write to db: " + detailInterestRate.textProperty().getValue()); } }
+        );
+                
+
     }
 
     @FXML
@@ -235,25 +273,10 @@ public class DebentureController {
         detailPane.setManaged(newStateVisible);
         if (newStateVisible) {
             debentureTableModel.currentDebentureProperty().bind(debentureTable.getSelectionModel().selectedItemProperty());
-            System.out.println("Selected row: " + debentureTableModel.getCurrentDebenture().getSymbol());
         } else {
             debentureTableModel.currentDebentureProperty().unbind();
         }
     }
-
-    @FXML
-    void handleRevert(ActionEvent event) {
-        detailInterestRate.setText(cachedInterestRate);
-    }
-
-    @FXML
-    void handleSave(ActionEvent event) {
-
-    }
-
-
-
-
     
  
 }

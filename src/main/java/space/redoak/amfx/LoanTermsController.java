@@ -122,10 +122,6 @@ public class LoanTermsController  {
 
 
     
-    public final static Pattern CURRENCY_PATTERN = Pattern.compile("^\\d{1,8}(\\.\\d{0,2})?$");
-    public final static Pattern INTEREST_PATTERN = Pattern.compile("^\\d{1,2}(\\.\\d{0,3})?$");
-    public final static Pattern DOUBLE_DIGIT_INT_PATTERN = Pattern.compile("^\\d{1,2}$");
-
     private final List<BooleanSupplier> fieldValidators = new ArrayList<>();
 
     private final RequiredFieldValidator foenixRequiredFieldValidator = new RequiredFieldValidator();
@@ -147,10 +143,10 @@ public class LoanTermsController  {
         
         foenixRequiredFieldValidator.setMessage("required");
     
-        prepareNumericField(amountJfxTextField, 100000, CURRENCY_PATTERN);
-        prepareNumericField(rateJfxTextField, 7, INTEREST_PATTERN);
+        prepareNumericField(amountJfxTextField, 100000, Formats.Money.getPattern());
+        prepareNumericField(rateJfxTextField, 7, Formats.Interest.getPattern());
         
-        setNumericChangeListener(paymentOverrideJfxTextField, CURRENCY_PATTERN, -1, false);
+        setNumericChangeListener(paymentOverrideJfxTextField, Formats.Money.getPattern(), -1, false);
         paymentOverrideJfxTextField.focusedProperty().addListener((o) -> {
             scheduleTable.setVisible(false);
             if (!paymentOverrideJfxTextField.getText().isBlank()) {
@@ -273,8 +269,8 @@ public class LoanTermsController  {
         monthControl.setText(Integer.toString(defaultMonths));
         
         // Restrict key press to numeric
-        setNumericChangeListener(yearControl, DOUBLE_DIGIT_INT_PATTERN, 35, true);
-        setNumericChangeListener(monthControl, DOUBLE_DIGIT_INT_PATTERN, 12, true);
+        setNumericChangeListener(yearControl, Formats.DoubleDigitInteger.getPattern(), 35, true);
+        setNumericChangeListener(monthControl, Formats.DoubleDigitInteger.getPattern(), 12, true);
 
         // ui error presentation on focus lost
         FoenixTermValidator termValidator = new FoenixTermValidator(yearControl, monthControl);

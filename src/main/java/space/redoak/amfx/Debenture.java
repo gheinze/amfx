@@ -53,7 +53,7 @@ public class Debenture {
         }
         
         
-        private Object createHyperlinkOrText(String url) {
+        public static Object createHyperlinkOrText(String url) {
             
             if (null == url) { return ""; }
             
@@ -117,9 +117,9 @@ public class Debenture {
         public final ObservableValue<Float> convertedProperty() { return this.converted; }
         public final Float getConverted() { return this.convertedProperty().getValue(); }
 
-        public final SimpleObjectProperty<Hyperlink> prospectusProperty() { return this.prospectus; }
-        public final Hyperlink getProspectus() { return this.prospectusProperty().get(); }
-        public final void setProspectus(final Hyperlink prospectus) { this.prospectusProperty().set(prospectus); }
+        public final SimpleObjectProperty<Object> prospectusProperty() { return this.prospectus; }
+        public final Object getProspectus() { return this.prospectusProperty().get(); }
+        public final void setProspectus(final Object prospectus) { this.prospectusProperty().set(prospectus); }
 
         public final StringProperty commentsProperty() { return this.comments; }
         public final String getComments() { return this.commentsProperty().get(); }
