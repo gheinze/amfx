@@ -48,6 +48,7 @@ public class AppController {
                         Pane debenturePane = (Pane) App.loadFXML("debenture");
                         Tab debentureTab = new Tab(DEBENTURE_TAB_TITLE);
                         debentureTab.setContent(debenturePane);
+                        debentureTab.setClosable(true);
                         tabPane.getTabs().add(debentureTab);
                         tabPane.getSelectionModel().select(debentureTab);
                     } catch (IOException ex) {

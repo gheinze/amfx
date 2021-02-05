@@ -77,6 +77,10 @@ public class DebentureController {
     private final StringConverter<Object> hyperlinkStringConverter = new StringConverter<>() {
         @Override
         public String toString​(Object object) {
+            if (null == object) return "";
+            if (object instanceof String) {
+                return (String)object;
+            }
             return ((Hyperlink)object).textProperty().getValue();
         }
 
@@ -120,6 +124,13 @@ public class DebentureController {
         
         
     private DebentureTableModel debentureTableModel;
+
+    private String cachedPercentage;
+    private LocalDate cahcedMaturityDate;
+    private String cachedUnderlyingSymbol;
+    private String cachedConversionPrice;
+    private String cachedProspectus;
+    private String cachedComments;
     
     @Autowired FinSecService finSecService;
     
@@ -187,8 +198,9 @@ public class DebentureController {
 
         // Remove detail pane bindings from the previously selected debenture that was in the table
         if (oldDebenture != null) {
+            detailSymbolLabel.textProperty().unbindBidirectional(oldDebenture.symbolProperty());
             detailInterestRate.textProperty().unbindBidirectional(oldDebenture.percentageProperty());
-            //detailMaturityDate;
+            detailMaturityDate.valueProperty().unbindBidirectional(oldDebenture.maturityDateProperty());
             detailUnderlyingSymbol.textProperty().unbindBidirectional(oldDebenture.underlyingSymbolProperty());
             detailConversionPrice.textProperty().unbindBidirectional(oldDebenture.conversionPriceProperty());
             detailProspectus.textProperty().unbindBidirectional(oldDebenture.prospectusProperty());
@@ -200,7 +212,7 @@ public class DebentureController {
         // If there is no debenture selected, nothing should go into the detail pane
         if (newDebenture == null) {
             detailInterestRate.clear();
-            //detailMaturityDate;
+            detailMaturityDate.setValue(LocalDate.now());
             detailUnderlyingSymbol.clear();
             detailConversionPrice.clear();
             detailProspectus.clear();
@@ -215,6 +227,15 @@ public class DebentureController {
             Bindings.bindBidirectional(detailConversionPrice.textProperty(), newDebenture.conversionPriceProperty(), moneyStringConverter);
             Bindings.bindBidirectional(detailProspectus.textProperty(), newDebenture.prospectusProperty(), hyperlinkStringConverter);
             Bindings.bindBidirectional(detailComments.textProperty(), newDebenture.commentsProperty());
+
+            // Cache values in order to determine if the field becomes modified
+            cachedPercentage = interestStringConverter.toString(newDebenture.percentageProperty().getValue());
+            cahcedMaturityDate = newDebenture.maturityDateProperty().getValue();
+            cachedUnderlyingSymbol = newDebenture.underlyingSymbolProperty().getValue();
+            cachedConversionPrice = moneyStringConverter.toString(newDebenture.conversionPriceProperty().getValue());
+            cachedProspectus = newDebenture.prospectusProperty().getValue().toString();
+            cachedComments = newDebenture.commentsProperty().getValue();
+            
         }
         
     };
@@ -259,13 +280,102 @@ public class DebentureController {
         
         
         detailInterestRate.focusedProperty().addListener(
-                (obs, oldVal, newVal)
-                -> { if (!newVal) { System.out.println("Write to db: " + detailInterestRate.textProperty().getValue()); } }
+                (obs, oldVal, newVal) -> {
+                    // new focus value "false" implies focus lost
+                    if (!newVal) {
+                        Float percentage = debentureTableModel.currentDebentureProperty().getValue().getPercentage();
+                        String precentageString = interestStringConverter.toString(percentage);
+                        if (!precentageString.equals(cachedPercentage)) {
+                            Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
+                            System.out.println("Write to db id: " + instrumentId + " value: "+ percentage);
+                            finSecService.updateDebentureRate(instrumentId, percentage);
+                            cachedPercentage = precentageString;
+                        }
+                    }
+                }
         );
                 
+        detailMaturityDate.focusedProperty().addListener(
+                (obs, oldVal, newVal) -> {
+                    if (!newVal) {
+                        LocalDate maturityDate = debentureTableModel.currentDebentureProperty().getValue().getMaturityDate();
+                        if (!maturityDate.equals(cahcedMaturityDate)) {
+                            Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
+                            System.out.println("Write to db id: " + instrumentId + " maturity: "+ maturityDate);
+                            finSecService.updateDebentureMaturityDate(instrumentId, maturityDate);
+                            cahcedMaturityDate = maturityDate;
+                        }
+                    }
+                }
+        );
+
+        detailUnderlyingSymbol.focusedProperty().addListener(
+                (obs, oldVal, newVal) -> {
+                    if (!newVal) {
+                        String underlyingSymbol = debentureTableModel.currentDebentureProperty().getValue().getUnderlyingSymbol();
+                        if (!underlyingSymbol.equals(cachedUnderlyingSymbol)) {
+                            Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
+                            System.out.println("Write to db id: " + instrumentId + " underlyingSymbol: "+ underlyingSymbol);
+                            Integer underlyingSymbolId = finSecService.findInstrumentIdForSymbol(underlyingSymbol);
+                            if (null == underlyingSymbolId) {
+                                System.out.println("Failed to find underlying symbol: " + underlyingSymbol);
+                                debentureTableModel.currentDebentureProperty().getValue().setUnderlyingSymbol(cachedUnderlyingSymbol);
+                            } else {
+                                finSecService.updateDebentureUnderlyingSymbol(instrumentId, underlyingSymbolId);
+                                cachedUnderlyingSymbol = underlyingSymbol;
+                            }
+                        }
+                    }
+                }
+        );
+
+        detailConversionPrice.focusedProperty().addListener(
+                (obs, oldVal, newVal) -> {
+                    if (!newVal) {
+                        Float conversionPrice = debentureTableModel.currentDebentureProperty().getValue().getConversionPrice();
+                        String conversionPriceString = moneyStringConverter.toString(conversionPrice);
+                        if (!conversionPriceString.equals(cachedConversionPrice)) {
+                            Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
+                            System.out.println("Write to db id: " + instrumentId + " conversionPrice: "+ conversionPrice);
+                            finSecService.updateDebentureConversionPrice(instrumentId, conversionPrice);
+                            cachedConversionPrice = conversionPriceString;
+                        }
+                    }
+                
+                }
+        );
+
+        detailProspectus.focusedProperty().addListener(
+                (obs, oldVal, newVal) -> {
+                    if (!newVal) {
+                        Object prospectus = debentureTableModel.currentDebentureProperty().getValue().getProspectus();
+                        if (!prospectus.toString().equals(cachedProspectus)) {
+                            Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
+                            System.out.println("Write to db id: " + instrumentId + " prospectus: "+ prospectus.toString());
+                            finSecService.updateDebentureProspectus(instrumentId, prospectus.toString());
+                            cachedProspectus = prospectus.toString();
+                        }
+                    }
+                }
+        );
+
+        detailComments.focusedProperty().addListener(
+                (obs, oldVal, newVal) -> {
+                    if (!newVal) {
+                        String comments = debentureTableModel.currentDebentureProperty().getValue().getComments();
+                        if ( null != comments && !comments.equals(cachedComments)) {
+                            Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
+                            System.out.println("Write to db id: " + instrumentId + " comments: "+ comments);
+                            finSecService.updateDebentureComments(instrumentId, comments);
+                            cachedComments = comments;
+                        }
+                    }
+                }
+        );
 
     }
 
+    
     @FXML
     void handleToggle(ActionEvent event) {
         boolean newStateVisible = !detailPane.isVisible();

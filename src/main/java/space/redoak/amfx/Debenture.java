@@ -1,7 +1,9 @@
 package space.redoak.amfx;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -16,10 +18,11 @@ import space.redoak.finance.securities.DebentureEntity;
  */
 public class Debenture {
 
+        private final Integer                         instrumentId;
         private final SimpleStringProperty            symbol;
         private final SimpleStringProperty            description;
         private final SimpleObjectProperty<Float>     percentage;
-        private final ObservableValue<Float>          effectiveRate;
+        private final SimpleObjectProperty            effectiveRate;
         private final SimpleObjectProperty<LocalDate> maturityDate;
         private final ObservableValue<Float>          closePrice;
         private final ObservableValue<Integer>        volume;
@@ -34,6 +37,7 @@ public class Debenture {
         private final SimpleStringProperty            comments;
 
         public Debenture(DebentureEntity debenture) {
+            this.instrumentId = debenture.getInstrumentId();
             this.symbol = new SimpleStringProperty(debenture.getSymbol());
             this.description = new SimpleStringProperty(debenture.getDescr());
             this.percentage = new SimpleObjectProperty<>(debenture.getPercentage());
@@ -50,6 +54,23 @@ public class Debenture {
             this.converted = new SimpleObjectProperty(debenture.getConverted());
             this.prospectus = new SimpleObjectProperty(createHyperlinkOrText(debenture.getProspectus()));
             this.comments = new SimpleStringProperty(debenture.getComments());
+            
+            effectiveRate.bind(
+                    Bindings.createObjectBinding(
+                            () -> {
+                                if (null == percentage.getValue() || null == closePrice.getValue() || null == maturityDate.getValue()) {
+                                    return null;
+                                }
+                                Float effRate = percentage.getValue() - (
+                                        (closePrice.getValue() - 100f) / (ChronoUnit.DAYS.between(LocalDate.now(), maturityDate.getValue()) / 365f)
+                                        );
+                                return effRate;
+                            },
+                            percentage, closePrice, maturityDate
+                    )
+            );
+            
+
         }
         
         
@@ -67,7 +88,10 @@ public class Debenture {
             
             return url;
         }
-        
+
+        public final Integer getInstrumentId() {
+            return instrumentId;
+        }
 
         public final StringProperty symbolProperty() { return this.symbol; }
         public final String getSymbol() { return this.symbolProperty().get(); }
@@ -81,8 +105,9 @@ public class Debenture {
         public final Float getPercentage() { return this.percentageProperty().getValue(); }
         public final void setPercentage(final Float percentage) { this.percentageProperty().set(percentage); }
 
-        public final ObservableValue<Float> effectiveRateProperty() { return this.effectiveRate; }
+        public final SimpleObjectProperty<Float> effectiveRateProperty() { return this.effectiveRate; }
         public final Float getEffectiveRate() { return this.effectiveRateProperty().getValue(); }
+        public final void setEffectiveRate(final Float effectiveRate) { this.effectiveRateProperty().set(effectiveRate); }
 
         public final SimpleObjectProperty<LocalDate> maturityDateProperty() { return this.maturityDate; }
         public final LocalDate getMaturityDate() { return this.maturityDateProperty().get(); }
