@@ -9,6 +9,7 @@ import javafx.scene.layout.Pane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import space.redoak.App;
 import space.redoak.finance.securities.FinSecService;
 
 @Slf4j

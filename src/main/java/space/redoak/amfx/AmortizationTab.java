@@ -4,6 +4,7 @@ package space.redoak.amfx;
 import java.io.IOException;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.Pane;
+import space.redoak.App;
 
 
 /**

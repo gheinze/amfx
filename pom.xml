@@ -9,15 +9,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.4.1</version>
+        <version>2.4.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <java.version>11</java.version>
+        <java.version>15</java.version>
         <money.version>1.4.2</money.version>
         <jfx.version>15.0.1</jfx.version>
         <jfoenix.version>9.0.10</jfoenix.version>
@@ -149,7 +147,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.5</version>
                 <configuration>
-                    <mainClass>space.redoak.amfx.App</mainClass>
+                    <mainClass>space.redoak.App</mainClass>
                     <options>
 <!--                        <option>-enable-preview</option>-->
                         <option>--add-opens java.base/java.lang.reflect=com.jfoenix</option>
@@ -266,7 +264,7 @@
                         <option>--add-exports</option>
                         <option>javafx.base/com.sun.javafx.event=com.jfoenix</option>
                             </options>
-                            <mainClass>space.redoak.amfx.App</mainClass>
+                            <mainClass>space.redoak.App</mainClass>
                         </configuration>
                     </execution>
                     <execution>

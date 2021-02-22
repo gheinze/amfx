@@ -26,7 +26,7 @@ public class FinSecService {
     }
     
     public void updateDebentureRate(Integer instrumentId, Float percentage) {
-        debentureRepo.updateDebentureSetPercentageForInstrumentId(instrumentId, percentage);
+        debentureRepo.updateDebentureDetailSetPercentageForInstrumentId(instrumentId, percentage);
     }
     
     public void updateDebentureMaturityDate(Integer instrumentId, LocalDate maturityDate) {

@@ -233,7 +233,7 @@ public class DebentureController {
             cahcedMaturityDate = newDebenture.maturityDateProperty().getValue();
             cachedUnderlyingSymbol = newDebenture.underlyingSymbolProperty().getValue();
             cachedConversionPrice = moneyStringConverter.toString(newDebenture.conversionPriceProperty().getValue());
-            cachedProspectus = newDebenture.prospectusProperty().getValue().toString();
+            cachedProspectus = hyperlinkStringConverter.toString(newDebenture.prospectusProperty().getValue());
             cachedComments = newDebenture.commentsProperty().getValue();
             
         }
@@ -299,7 +299,7 @@ public class DebentureController {
                 (obs, oldVal, newVal) -> {
                     if (!newVal) {
                         LocalDate maturityDate = debentureTableModel.currentDebentureProperty().getValue().getMaturityDate();
-                        if (!maturityDate.equals(cahcedMaturityDate)) {
+                        if (null != maturityDate && !maturityDate.equals(cahcedMaturityDate)) {
                             Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
                             System.out.println("Write to db id: " + instrumentId + " maturity: "+ maturityDate);
                             finSecService.updateDebentureMaturityDate(instrumentId, maturityDate);
@@ -313,7 +313,9 @@ public class DebentureController {
                 (obs, oldVal, newVal) -> {
                     if (!newVal) {
                         String underlyingSymbol = debentureTableModel.currentDebentureProperty().getValue().getUnderlyingSymbol();
-                        if (!underlyingSymbol.equals(cachedUnderlyingSymbol)) {
+                        if (null != underlyingSymbol && !underlyingSymbol.equals(cachedUnderlyingSymbol)) {
+                            underlyingSymbol = underlyingSymbol.toUpperCase();
+                            debentureTableModel.currentDebentureProperty().getValue().setUnderlyingSymbol(underlyingSymbol);
                             Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
                             System.out.println("Write to db id: " + instrumentId + " underlyingSymbol: "+ underlyingSymbol);
                             Integer underlyingSymbolId = finSecService.findInstrumentIdForSymbol(underlyingSymbol);
@@ -348,12 +350,13 @@ public class DebentureController {
         detailProspectus.focusedProperty().addListener(
                 (obs, oldVal, newVal) -> {
                     if (!newVal) {
-                        Object prospectus = debentureTableModel.currentDebentureProperty().getValue().getProspectus();
-                        if (!prospectus.toString().equals(cachedProspectus)) {
+                        Object prospectusObject = debentureTableModel.currentDebentureProperty().getValue().getProspectus();
+                        String prospectus = hyperlinkStringConverter.toString(prospectusObject);
+                        if (!prospectus.equals(cachedProspectus)) {
                             Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
-                            System.out.println("Write to db id: " + instrumentId + " prospectus: "+ prospectus.toString());
-                            finSecService.updateDebentureProspectus(instrumentId, prospectus.toString());
-                            cachedProspectus = prospectus.toString();
+                            System.out.println("Write to db id: " + instrumentId + " prospectus: "+ prospectus);
+                            finSecService.updateDebentureProspectus(instrumentId, prospectus);
+                            cachedProspectus = prospectus;
                         }
                     }
                 }

@@ -10,6 +10,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Hyperlink;
+import space.redoak.App;
 import space.redoak.finance.securities.DebentureEntity;
 
 /**

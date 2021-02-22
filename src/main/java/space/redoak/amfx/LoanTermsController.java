@@ -38,6 +38,7 @@ import org.javamoney.moneta.format.CurrencyStyle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import space.redoak.App;
 import space.redoak.finance.loan.AmortizationAttributes;
 import space.redoak.finance.loan.AmortizationCalculator;
 import space.redoak.finance.loan.ScheduledPayment;
