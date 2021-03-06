@@ -56,6 +56,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.accounted4</groupId>
+            <artifactId>a4-finance</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${jfx.version}</version>

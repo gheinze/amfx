@@ -39,10 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import space.redoak.App;
-import space.redoak.finance.loan.AmortizationAttributes;
-import space.redoak.finance.loan.AmortizationCalculator;
-import space.redoak.finance.loan.ScheduledPayment;
-import space.redoak.finance.loan.TimePeriod;
+import com.accounted4.finance.loan.AmortizationAttributes;
+import com.accounted4.finance.loan.AmortizationCalculator;
+import com.accounted4.finance.loan.ScheduledPayment;
+import com.accounted4.finance.loan.TimePeriod;
 import space.redoak.finance.loan.AmortizationReportService;
 import space.redoak.util.TableCutAndPaste;
 
@@ -135,7 +135,6 @@ public class LoanTermsController  {
     );
 
 
-    @Autowired AmortizationCalculator amortizationCalculator;
     @Autowired AmortizationReportService amReportService;
     
     
@@ -193,7 +192,7 @@ public class LoanTermsController  {
     
     @FXML
     private void scheduleButtonClicked() {
-        List<ScheduledPayment> schedule = amortizationCalculator.generateSchedule(getAmAttributes());
+        List<ScheduledPayment> schedule = AmortizationCalculator.generateSchedule(getAmAttributes());
         List<RowData> observableCollection = schedule.stream()
                 .map(s -> new RowData(s))
                 .collect(Collectors.toList());
@@ -384,7 +383,7 @@ public class LoanTermsController  {
             paymentOverrideJfxTextField.setText("");
         } else {
             
-            periodicPayment = amortizationCalculator.getPeriodicPayment(getAmAttributes());
+            periodicPayment = AmortizationCalculator.getPeriodicPayment(getAmAttributes());
             
             String customFormatted = currencyFormatter.format(periodicPayment);
             paymentLabel.setText(customFormatted);
