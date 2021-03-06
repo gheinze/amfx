@@ -73,7 +73,11 @@ public class LoanTermsController  {
     private JFXComboBox<TimePeriod> paymentFrequencyJfxComboBox;
 
     @FXML
-    private Label paymentLabel;
+    private JFXTextField paymentJfxTextField;
+
+    @FXML
+    private JFXTextField perDiemTextField;
+    
     private MonetaryAmount periodicPayment = Money.of(BigDecimal.ZERO, "CAD");
     
     @FXML
@@ -379,14 +383,20 @@ public class LoanTermsController  {
         pdfJfxButton.setDisable(formHasError);
         
         if (formHasError) {
-            paymentLabel.setText("");
+            paymentJfxTextField.setText("");
+            perDiemTextField.setText("");
             paymentOverrideJfxTextField.setText("");
         } else {
             
-            periodicPayment = AmortizationCalculator.getPeriodicPayment(getAmAttributes());
+            AmortizationAttributes amAttributes = getAmAttributes();
             
+            periodicPayment = AmortizationCalculator.getPeriodicPayment(amAttributes);
             String customFormatted = currencyFormatter.format(periodicPayment);
-            paymentLabel.setText(customFormatted);
+            paymentJfxTextField.setText(customFormatted);
+            
+            MonetaryAmount perDiem = AmortizationCalculator.getPerDiem(amAttributes.getLoanAmount(), amAttributes.getInterestRateAsPercent());
+            customFormatted = currencyFormatter.format(perDiem);
+            perDiemTextField.setText(customFormatted);
             
             setPaymentOverride();
 

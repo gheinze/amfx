@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<HBox stylesheets="@amfx.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="space.redoak.amfx.LoanTermsController">
+<HBox stylesheets="@amfx.css" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="space.redoak.amfx.LoanTermsController">
    <children>
       <AnchorPane>
          <children>
@@ -36,12 +36,13 @@
                   <Insets />
                </opaqueInsets>
             </Pane>
-            <JFXComboBox fx:id="paymentFrequencyJfxComboBox" labelFloat="true" layoutX="14.0" layoutY="331.0" prefHeight="26.0" prefWidth="148.0" promptText="Payment" />
-            <Label fx:id="paymentLabel" layoutX="14.0" layoutY="387.0" prefHeight="19.0" prefWidth="119.0" text="Payment">
+            <JFXComboBox fx:id="paymentFrequencyJfxComboBox" labelFloat="true" layoutX="14.0" layoutY="331.0" prefHeight="26.0" prefWidth="148.0" promptText="Frequency" />
+            <JFXTextField fx:id="paymentJfxTextField" editable="false" labelFloat="true" layoutX="14.0" layoutY="384.0" prefHeight="26.0" prefWidth="148.0" promptText="Regular Payment">
                <font>
                   <Font name="System Bold" size="15.0" />
                </font>
-            </Label>
+            </JFXTextField>
+            <JFXTextField fx:id="perDiemTextField" editable="false" labelFloat="true" layoutX="14.0" layoutY="436.0" prefHeight="26.0" prefWidth="148.0" promptText="Per Diem" />
          </children>
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -62,8 +63,8 @@
             <JFXDatePicker fx:id="startDateJfxDatePicker" layoutX="14.0" layoutY="270.0" prefHeight="29.0" prefWidth="160.0" promptText="Start Date" />
             <JFXDatePicker fx:id="adjustmentDateJfxDatePicker" layoutX="14.0" layoutY="331.0" prefHeight="29.0" prefWidth="160.0" promptText="Adjustment Date" />
             <JFXTextField fx:id="paymentOverrideJfxTextField" labelFloat="true" layoutX="14.0" layoutY="387.0" prefHeight="26.0" prefWidth="148.0" promptText="Payment Override" />
-            <JFXButton fx:id="scheduleJfxButton" layoutX="14.0" layoutY="431.0" minWidth="45.0" onAction="#scheduleButtonClicked" prefHeight="26.0" text="Schedule" />
-            <JFXButton fx:id="pdfJfxButton" layoutX="105.0" layoutY="431.0" minWidth="44.0" onAction="#pdfButtonClicked" prefHeight="26.0" text="PDF" />
+            <JFXButton fx:id="scheduleJfxButton" layoutX="14.0" layoutY="433.0" minWidth="45.0" onAction="#scheduleButtonClicked" prefHeight="26.0" text="Schedule" />
+            <JFXButton fx:id="pdfJfxButton" layoutX="105.0" layoutY="433.0" minWidth="44.0" onAction="#pdfButtonClicked" prefHeight="26.0" text="PDF" />
          </children>
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
