@@ -1,6 +1,7 @@
 package space.redoak.finance.securities;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,9 @@ public class FinSecService {
 
     @Autowired
     private DebentureRepository debentureRepo;
+    
+    @Autowired
+    private QuoteRepository quoteRepository;
 
     
     public Page<DebentureEntity> getDebentures(Pageable pageRequest) {
@@ -47,6 +51,11 @@ public class FinSecService {
     
     public void updateDebentureComments(Integer instrumentId, String comments) {
         debentureRepo.updateDebentureSetCommentsForInstrumentId(instrumentId, comments);        
+    }
+    
+    
+    public List<QuoteEntity> getQuotes(Integer instrumentId, LocalDate fromDate) {
+        return quoteRepository.getQuotes(instrumentId, fromDate);
     }
     
 }

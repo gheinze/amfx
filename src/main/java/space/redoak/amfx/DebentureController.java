@@ -9,8 +9,15 @@ import java.util.stream.Collectors;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
@@ -18,6 +25,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.util.StringConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +33,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import space.redoak.finance.securities.DebentureEntity;
-
+import space.redoak.finance.securities.QuoteEntity;
 import space.redoak.finance.securities.FinSecService;
+import space.redoak.finance.securities.QuoteChart;
 import space.redoak.util.TableCutAndPaste;
 
 
@@ -132,6 +141,10 @@ public class DebentureController {
     private String cachedProspectus;
     private String cachedComments;
     
+    @FXML
+    private StackPane chartStackPane;
+    private QuoteChart detailQuoteChart;
+    
     @Autowired FinSecService finSecService;
     
     
@@ -205,6 +218,7 @@ public class DebentureController {
             detailConversionPrice.textProperty().unbindBidirectional(oldDebenture.conversionPriceProperty());
             detailProspectus.textProperty().unbindBidirectional(oldDebenture.prospectusProperty());
             detailComments.textProperty().unbindBidirectional(oldDebenture.commentsProperty());
+            chartStackPane.getChildren().remove(detailQuoteChart);
             
             
         }
@@ -217,6 +231,7 @@ public class DebentureController {
             detailConversionPrice.clear();
             detailProspectus.clear();
             detailComments.clear();
+            chartStackPane.getChildren().remove(detailQuoteChart);
            
         // Bind the detail pane to the selected debenture in the table
         } else {
@@ -236,6 +251,9 @@ public class DebentureController {
             cachedProspectus = hyperlinkStringConverter.toString(newDebenture.prospectusProperty().getValue());
             cachedComments = newDebenture.commentsProperty().getValue();
             
+            List<QuoteEntity> quotes = finSecService.getQuotes(newDebenture.getInstrumentId(), LocalDate.of(2020, 1, 1));
+            detailQuoteChart = new QuoteChart(quotes);
+            chartStackPane.getChildren().add(detailQuoteChart);
         }
         
     };
