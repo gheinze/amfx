@@ -9,23 +9,18 @@ import java.util.stream.Collectors;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
+import javafx.scene.control.Control;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,8 +95,6 @@ public class DebentureController {
     };
 
     
-    @FXML private BorderPane debentureDetail;
-    
     @FXML private TableView<Debenture> debentureTable;
 
     @FXML private TableColumn<Debenture, String> symbolColumn;
@@ -160,16 +153,16 @@ public class DebentureController {
     
     
     public void prepareDebentureTable() {
-        
+
         symbolColumn.setCellValueFactory(row -> row.getValue().symbolProperty());
         descriptionColumn.setCellValueFactory(row -> row.getValue().descriptionProperty());
-        
+
         parRateColumn.setCellValueFactory(row -> row.getValue().percentageProperty());
         parRateColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> Formats.Interest.nullSafeFormat(value));
         
         effectiveRateColumn.setCellValueFactory(row -> row.getValue().effectiveRateProperty());
         effectiveRateColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> Formats.Interest.nullSafeFormat(value));
-
+        
         maturityColumn.setCellValueFactory(row -> row.getValue().maturityDateProperty());
         
         closeColumn.setCellValueFactory(row -> row.getValue().closePriceProperty());
@@ -199,7 +192,7 @@ public class DebentureController {
         prospectusColumn.setCellValueFactory(row -> row.getValue().prospectusProperty());
         
         commentsColumn.setCellValueFactory(row -> row.getValue().commentsProperty());
-
+        
         debentureTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         //debentureTable.getSelectionModel().setCellSelectionEnabled(true);
         TableCutAndPaste.installCopyPasteHandler(debentureTable);
@@ -207,7 +200,7 @@ public class DebentureController {
     }
 
 
-    private ChangeListener<Debenture> debentureChangeListener = (ObservableValue<? extends Debenture> obs, Debenture oldDebenture, Debenture newDebenture) -> {
+    private final ChangeListener<Debenture> debentureChangeListener = (ObservableValue<? extends Debenture> obs, Debenture oldDebenture, Debenture newDebenture) -> {
 
         // Remove detail pane bindings from the previously selected debenture that was in the table
         if (oldDebenture != null) {

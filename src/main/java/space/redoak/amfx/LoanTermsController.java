@@ -1,6 +1,5 @@
 package space.redoak.amfx;
 
-import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
@@ -24,7 +23,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -43,6 +41,7 @@ import com.accounted4.finance.loan.AmortizationAttributes;
 import com.accounted4.finance.loan.AmortizationCalculator;
 import com.accounted4.finance.loan.ScheduledPayment;
 import com.accounted4.finance.loan.TimePeriod;
+import javafx.scene.control.Button;
 import space.redoak.finance.loan.AmortizationReportService;
 import space.redoak.util.TableCutAndPaste;
 
@@ -78,8 +77,6 @@ public class LoanTermsController  {
     @FXML
     private JFXTextField perDiemTextField;
     
-    private MonetaryAmount periodicPayment = Money.of(BigDecimal.ZERO, "CAD");
-    
     @FXML
     private JFXTextField preparedForJfxTextField;
 
@@ -102,10 +99,7 @@ public class LoanTermsController  {
     private JFXTextField paymentOverrideJfxTextField;
 
     @FXML
-    private JFXButton scheduleJfxButton;
-
-    @FXML
-    private JFXButton pdfJfxButton;
+    private Button pdfButton;
 
     @FXML
     private TableView<RowData> scheduleTable;
@@ -152,10 +146,7 @@ public class LoanTermsController  {
         
         setNumericChangeListener(paymentOverrideJfxTextField, Formats.Money.getPattern(), -1, false);
         paymentOverrideJfxTextField.focusedProperty().addListener((o) -> {
-            scheduleTable.setVisible(false);
-            if (!paymentOverrideJfxTextField.getText().isBlank()) {
-                setPaymentOverride();
-            }
+            fireFormStateChange();
         });
         
         prepareYearMonthInterval(amYearsJfxTextField, amMonthsJfxTextField, 20, 0);
@@ -194,15 +185,14 @@ public class LoanTermsController  {
     }
 
     
-    @FXML
-    private void scheduleButtonClicked() {
-        List<ScheduledPayment> schedule = AmortizationCalculator.generateSchedule(getAmAttributes());
+    private void updateScheduleTable(AmortizationAttributes amAttributes) {
+        List<ScheduledPayment> schedule = AmortizationCalculator.generateSchedule(amAttributes);
         List<RowData> observableCollection = schedule.stream()
                 .map(s -> new RowData(s))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+                ;
         scheduleTable.setItems(FXCollections.observableArrayList(observableCollection));        
         scheduleTable.setVisible(true);
-        //scheduleTable.refresh();
     }
 
     
@@ -322,8 +312,6 @@ public class LoanTermsController  {
     
     private void prepareScheduleTable() {
         
-        scheduleTable.setVisible(false);
-        
         paymentColumn.setCellValueFactory(param -> param.getValue().payment);
         dateColumn.setCellValueFactory(param -> param.getValue().date);
         interestColumn.setCellValueFactory(param -> param.getValue().interest);
@@ -379,18 +367,18 @@ public class LoanTermsController  {
                 .isPresent()
                 ;
         
-        scheduleJfxButton.setDisable(formHasError);
-        pdfJfxButton.setDisable(formHasError);
+        pdfButton.setDisable(formHasError);
         
         if (formHasError) {
             paymentJfxTextField.setText("");
             perDiemTextField.setText("");
             paymentOverrideJfxTextField.setText("");
+            scheduleTable.setVisible(false);
         } else {
             
             AmortizationAttributes amAttributes = getAmAttributes();
             
-            periodicPayment = AmortizationCalculator.getPeriodicPayment(amAttributes);
+            MonetaryAmount periodicPayment = AmortizationCalculator.getPeriodicPayment(amAttributes);
             String customFormatted = currencyFormatter.format(periodicPayment);
             paymentJfxTextField.setText(customFormatted);
             
@@ -398,25 +386,8 @@ public class LoanTermsController  {
             customFormatted = currencyFormatter.format(perDiem);
             perDiemTextField.setText(customFormatted);
             
-            setPaymentOverride();
+            updateScheduleTable(amAttributes);
 
-            scheduleTable.setVisible(false);
-
-        }
-        
-    }
-    
-    private void setPaymentOverride() {
-
-        if (paymentOverrideJfxTextField.getText().isEmpty()) {
-            return;
-        }
-        
-        BigDecimal override = new BigDecimal(paymentOverrideJfxTextField.getText());
-        Money overrideAmount = Money.of(override, "CAD");
-        
-        if (periodicPayment.isGreaterThan(overrideAmount)) {
-            paymentOverrideJfxTextField.setText("");
         }
         
     }
@@ -446,27 +417,35 @@ public class LoanTermsController  {
     }
 
 
+    private Money textToCad(String text) {
+        BigDecimal amount = new BigDecimal(text);
+        return Money.of(amount, "CAD");        
+    }
+    
+    
     private AmortizationAttributes getAmAttributes() {
         
-        BigDecimal amount = new BigDecimal(amountJfxTextField.getText());
-        Money moneyAmount = Money.of(amount, "CAD");
+        AmortizationAttributes attr = new AmortizationAttributes();
+
+        Money loanAmount = textToCad(amountJfxTextField.getText());
+        attr.setLoanAmount(loanAmount);
         
         int amYears  = Integer.parseInt(amYearsJfxTextField.getText());
         int amMonths = Integer.parseInt(amMonthsJfxTextField.getText());
         int amPeriod = amYears * 12 + amMonths;
+        attr.setAmortizationPeriodInMonths(amPeriod);
         
         int termYears  = Integer.parseInt(termYearsJfxTextField.getText());
         int termMonths = Integer.parseInt(termMonthsJfxTextField.getText());
         int termPeriod = termYears * 12 + termMonths;
+        attr.setTermInMonths(termPeriod);
         
-        AmortizationAttributes attr = new AmortizationAttributes();
-        attr.setLoanAmount(moneyAmount);
-
-
-        BigDecimal override = paymentOverrideJfxTextField.getText().isEmpty() ? 
-                BigDecimal.ZERO : new BigDecimal(paymentOverrideJfxTextField.getText());
-        Money overrideAmount = Money.of(override, "CAD");
-        attr.setRegularPayment(overrideAmount.isGreaterThan(periodicPayment) ? overrideAmount : periodicPayment);
+        if (!paymentOverrideJfxTextField.getText().isEmpty()) {
+            Money overrideMoney = textToCad(paymentOverrideJfxTextField.getText());
+            attr.setRegularPayment(overrideMoney);
+        } else {
+            attr.setRegularPayment(null);
+        }
 
         LocalDate startDate = startDateJfxDatePicker.getValue();
         LocalDate adjustmentDate = adjustmentDateJfxDatePicker.getValue();
@@ -480,15 +459,11 @@ public class LoanTermsController  {
         attr.setStartDate(startDate);
         attr.setAdjustmentDate(adjustmentDate);
 
-        attr.setTermInMonths(termPeriod);
         attr.setInterestOnly(!amortizedJfxToggleButton.isSelected());
-        attr.setAmortizationPeriodInMonths(amPeriod);
         attr.setCompoundingPeriodsPerYear(compoundingPeriodJfxComboBox.getValue().getPeriodsPerYear());
         attr.setPaymentFrequency(paymentFrequencyJfxComboBox.getValue().getPeriodsPerYear());
         attr.setInterestRateAsPercent(Double.valueOf(rateJfxTextField.getText()));
 
-        //String preparedFor = preparedForJfxTextField.getText();
-        
         return attr;
     }
 

@@ -1,90 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXComboBox?>
 <?import com.jfoenix.controls.JFXDatePicker?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import com.jfoenix.controls.JFXToggleButton?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox stylesheets="@amfx.css" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="space.redoak.amfx.LoanTermsController">
+<VBox prefHeight="789.0" prefWidth="1059.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="space.redoak.amfx.LoanTermsController">
    <children>
-      <AnchorPane>
+      <ToolBar prefHeight="40.0" prefWidth="200.0">
+        <items>
+            <Button fx:id="pdfButton" mnemonicParsing="false" onMouseClicked="#pdfButtonClicked">
+               <graphic>
+                  <FontAwesomeIconView glyphName="FILE_PDF_ALT" />
+               </graphic>
+               <tooltip>
+                  <Tooltip text="PDF" />
+               </tooltip>
+            </Button>
+        </items>
+      </ToolBar>
+      <HBox>
          <children>
-            <Label layoutX="14.0" layoutY="14.0" text="Terms">
-               <font>
-                  <Font name="System Bold" size="20.0" />
-               </font>
-            </Label>
-            <JFXTextField fx:id="amountJfxTextField" labelFloat="true" layoutX="14.0" layoutY="65.0" prefHeight="26.0" prefWidth="119.0" promptText="Loan Amount" />
-            <JFXTextField fx:id="rateJfxTextField" labelFloat="true" layoutX="14.0" layoutY="125.0" prefHeight="26.0" prefWidth="119.0" promptText="Interest Rate" />
-            <JFXToggleButton fx:id="amortizedJfxToggleButton" layoutY="159.0" onAction="#amortizationStateChanged" prefHeight="55.0" prefWidth="148.0" text="Amortized" textFill="#b0bec5" />
-            <Pane layoutY="192.0" prefHeight="110.0" prefWidth="148.0">
+            <AnchorPane>
                <children>
-                  <JFXTextField fx:id="amYearsJfxTextField" labelFloat="true" layoutX="14.0" layoutY="26.0" prefHeight="26.0" prefWidth="50.0" promptText="Years" />
-                  <JFXTextField fx:id="amMonthsJfxTextField" labelFloat="true" layoutX="85.0" layoutY="26.0" prefHeight="26.0" prefWidth="50.0" promptText="Months" />
-                  <JFXComboBox fx:id="compoundingPeriodJfxComboBox" labelFloat="true" layoutX="14.0" layoutY="82.0" prefHeight="26.0" prefWidth="148.0" promptText="Compounding" />
+                  <Label layoutX="14.0" layoutY="14.0" text="Terms">
+                     <font>
+                        <Font name="System Bold" size="20.0" />
+                     </font>
+                  </Label>
+                  <JFXTextField fx:id="amountJfxTextField" labelFloat="true" layoutX="14.0" layoutY="65.0" prefHeight="26.0" prefWidth="119.0" promptText="Loan Amount" />
+                  <JFXTextField fx:id="rateJfxTextField" labelFloat="true" layoutX="14.0" layoutY="125.0" prefHeight="26.0" prefWidth="119.0" promptText="Interest Rate" />
+                  <JFXToggleButton fx:id="amortizedJfxToggleButton" layoutY="159.0" onAction="#amortizationStateChanged" prefHeight="55.0" prefWidth="148.0" text="Amortized" textFill="#b0bec5" />
+                  <Pane layoutY="207.0" prefHeight="130.0" prefWidth="181.0" style="-fx-background-color: #eae8e8;">
+                     <children>
+                        <JFXTextField fx:id="amYearsJfxTextField" labelFloat="true" layoutX="14.0" layoutY="18.0" prefHeight="26.0" prefWidth="50.0" promptText="Years" />
+                        <JFXTextField fx:id="amMonthsJfxTextField" labelFloat="true" layoutX="85.0" layoutY="18.0" prefHeight="26.0" prefWidth="50.0" promptText="Months" />
+                        <JFXComboBox fx:id="compoundingPeriodJfxComboBox" labelFloat="true" layoutX="14.0" layoutY="74.0" prefHeight="26.0" prefWidth="148.0" promptText="Compounding" />
+                     </children>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </Pane>
+                  <JFXComboBox fx:id="paymentFrequencyJfxComboBox" labelFloat="true" layoutX="14.0" layoutY="360.0" prefHeight="26.0" prefWidth="148.0" promptText="Frequency" />
+                  <JFXTextField fx:id="paymentJfxTextField" editable="false" labelFloat="true" layoutX="14.0" layoutY="440.0" prefHeight="26.0" prefWidth="148.0" promptText="Regular Payment">
+                     <font>
+                        <Font name="System Bold" size="15.0" />
+                     </font>
+                  </JFXTextField>
+                  <JFXTextField fx:id="perDiemTextField" editable="false" labelFloat="true" layoutX="14.0" layoutY="505.0" prefHeight="26.0" prefWidth="148.0" promptText="Per Diem" />
                </children>
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
-            </Pane>
-            <JFXComboBox fx:id="paymentFrequencyJfxComboBox" labelFloat="true" layoutX="14.0" layoutY="331.0" prefHeight="26.0" prefWidth="148.0" promptText="Frequency" />
-            <JFXTextField fx:id="paymentJfxTextField" editable="false" labelFloat="true" layoutX="14.0" layoutY="384.0" prefHeight="26.0" prefWidth="148.0" promptText="Regular Payment">
-               <font>
-                  <Font name="System Bold" size="15.0" />
-               </font>
-            </JFXTextField>
-            <JFXTextField fx:id="perDiemTextField" editable="false" labelFloat="true" layoutX="14.0" layoutY="436.0" prefHeight="26.0" prefWidth="148.0" promptText="Per Diem" />
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </AnchorPane>
+            <AnchorPane>
+               <children>
+                  <Label layoutX="14.0" layoutY="14.0" text="Schedule">
+                     <font>
+                        <Font name="System Bold" size="20.0" />
+                     </font>
+                  </Label>
+                  <JFXTextField fx:id="preparedForJfxTextField" labelFloat="true" layoutX="14.0" layoutY="65.0" prefHeight="26.0" prefWidth="119.0" promptText="Prepared For" />
+                  <JFXTextField fx:id="preparedByJfxTextField" labelFloat="true" layoutX="14.0" layoutY="125.0" prefHeight="26.0" prefWidth="119.0" promptText="Prepared By" />
+                  <Label layoutX="14.0" layoutY="183.0" text="Term">
+                     <font>
+                        <Font name="System Bold Italic" size="13.0" />
+                     </font>
+                  </Label>
+                  <JFXTextField fx:id="termYearsJfxTextField" labelFloat="true" layoutX="14.0" layoutY="224.0" prefHeight="26.0" prefWidth="50.0" promptText="Years" />
+                  <JFXTextField fx:id="termMonthsJfxTextField" labelFloat="true" layoutX="75.0" layoutY="224.0" prefHeight="26.0" prefWidth="50.0" promptText="Months" />
+                  <JFXDatePicker fx:id="startDateJfxDatePicker" layoutX="14.0" layoutY="281.0" prefHeight="29.0" prefWidth="160.0" promptText="Start Date" />
+                  <JFXDatePicker fx:id="adjustmentDateJfxDatePicker" layoutX="14.0" layoutY="360.0" prefHeight="29.0" prefWidth="160.0" promptText="Adjustment Date" />
+                  <JFXTextField fx:id="paymentOverrideJfxTextField" labelFloat="true" layoutX="14.0" layoutY="440.0" prefHeight="26.0" prefWidth="148.0" promptText="Payment Override" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </AnchorPane>
+            <AnchorPane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+               <children>
+                  <TableView fx:id="scheduleTable" layoutX="40.0" prefHeight="689.0" prefWidth="584.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0">
+                    <columns>
+                      <TableColumn fx:id="paymentColumn" editable="false" minWidth="90.0" prefWidth="90.0" sortable="false" text="Payment" />
+                      <TableColumn fx:id="dateColumn" editable="false" minWidth="90.0" prefWidth="90.0" text="Date" />
+                        <TableColumn fx:id="interestColumn" editable="false" minWidth="90.0" prefWidth="90.0" sortable="false" styleClass="moneyColumn" text="Interest" />
+                        <TableColumn fx:id="principalColumn" editable="false" minWidth="90.0" prefWidth="90.0" sortable="false" styleClass="moneyColumn" text="Principal" />
+                        <TableColumn fx:id="balanceColumn" editable="false" minWidth="110.0" prefWidth="110.0" sortable="false" styleClass="moneyColumn" text="Balance" />
+                    </columns>
+                  </TableView>
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </AnchorPane>
          </children>
-         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding>
-      </AnchorPane>
-      <AnchorPane>
-         <children>
-            <Label layoutX="14.0" layoutY="14.0" text="Schedule">
-               <font>
-                  <Font name="System Bold" size="20.0" />
-               </font>
-            </Label>
-            <JFXTextField fx:id="preparedForJfxTextField" labelFloat="true" layoutX="14.0" layoutY="65.0" prefHeight="26.0" prefWidth="119.0" promptText="Prepared For" />
-            <JFXTextField fx:id="preparedByJfxTextField" labelFloat="true" layoutX="14.0" layoutY="125.0" prefHeight="26.0" prefWidth="119.0" promptText="Prepared By" />
-            <Label layoutX="14.0" layoutY="183.0" text="Term" />
-            <JFXTextField fx:id="termYearsJfxTextField" labelFloat="true" layoutX="14.0" layoutY="218.0" prefHeight="26.0" prefWidth="50.0" promptText="Years" />
-            <JFXTextField fx:id="termMonthsJfxTextField" labelFloat="true" layoutX="75.0" layoutY="218.0" prefHeight="26.0" prefWidth="50.0" promptText="Months" />
-            <JFXDatePicker fx:id="startDateJfxDatePicker" layoutX="14.0" layoutY="270.0" prefHeight="29.0" prefWidth="160.0" promptText="Start Date" />
-            <JFXDatePicker fx:id="adjustmentDateJfxDatePicker" layoutX="14.0" layoutY="331.0" prefHeight="29.0" prefWidth="160.0" promptText="Adjustment Date" />
-            <JFXTextField fx:id="paymentOverrideJfxTextField" labelFloat="true" layoutX="14.0" layoutY="387.0" prefHeight="26.0" prefWidth="148.0" promptText="Payment Override" />
-            <JFXButton fx:id="scheduleJfxButton" layoutX="14.0" layoutY="433.0" minWidth="45.0" onAction="#scheduleButtonClicked" prefHeight="26.0" text="Schedule" />
-            <JFXButton fx:id="pdfJfxButton" layoutX="105.0" layoutY="433.0" minWidth="44.0" onAction="#pdfButtonClicked" prefHeight="26.0" text="PDF" />
-         </children>
-         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding>
-      </AnchorPane>
-      <AnchorPane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
-         <children>
-            <TableView fx:id="scheduleTable" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-              <columns>
-                <TableColumn fx:id="paymentColumn" editable="false" minWidth="90.0" prefWidth="90.0" sortable="false" text="Payment" />
-                <TableColumn fx:id="dateColumn" editable="false" minWidth="90.0" prefWidth="90.0" text="Date" />
-                  <TableColumn fx:id="interestColumn" editable="false" minWidth="90.0" prefWidth="90.0" sortable="false" styleClass="moneyColumn" text="Interest" />
-                  <TableColumn fx:id="principalColumn" editable="false" minWidth="90.0" prefWidth="90.0" sortable="false" styleClass="moneyColumn" text="Principal" />
-                  <TableColumn fx:id="balanceColumn" editable="false" minWidth="110.0" prefWidth="110.0" sortable="false" styleClass="moneyColumn" text="Balance" />
-              </columns>
-            </TableView>
-         </children>
-         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding>
-      </AnchorPane>
+      </HBox>
    </children>
-</HBox>
+</VBox>
