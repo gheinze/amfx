@@ -18,7 +18,7 @@
    <children>
       <BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="1200.0" prefWidth="1600.0">
          <center>
-            <TabPane id="primaryTabPane" fx:id="tabPane" prefHeight="1098.0" prefWidth="1641.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+            <TabPane id="primaryTabPane" fx:id="tabPane" prefHeight="1098.0" prefWidth="1641.0" tabClosingPolicy="ALL_TABS" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </BorderPane.margin>
@@ -45,6 +45,7 @@
                         <Menu mnemonicParsing="false" text="Securities">
                           <items>
                             <MenuItem mnemonicParsing="false" onAction="#openDebentureTab" text="Debentures" />
+                              <MenuItem mnemonicParsing="false" onAction="#openEodTab" text="Load End of Day Data" />
                           </items>
                         </Menu>
                       <Menu mnemonicParsing="false" text="Help">

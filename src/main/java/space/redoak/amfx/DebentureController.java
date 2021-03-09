@@ -193,6 +193,17 @@ public class DebentureController {
         
         commentsColumn.setCellValueFactory(row -> row.getValue().commentsProperty());
         
+        commentsColumn.setCellFactory(tc -> {
+            TableCell<Debenture, String> cell = new TableCell<>();
+            Text text = new Text();
+            cell.setGraphic(text);
+            cell.setPrefHeight(Control.USE_COMPUTED_SIZE);
+            text.wrappingWidthProperty().bind(commentsColumn.widthProperty());
+            text.textProperty().bind(cell.itemProperty());
+            return cell;
+        });
+        
+
         debentureTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         //debentureTable.getSelectionModel().setCellSelectionEnabled(true);
         TableCutAndPaste.installCopyPasteHandler(debentureTable);

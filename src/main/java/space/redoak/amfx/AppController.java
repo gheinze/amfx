@@ -16,7 +16,25 @@ import space.redoak.finance.securities.FinSecService;
 @Component
 public class AppController {
 
-    private static final String DEBENTURE_TAB_TITLE = "Debentures";
+    private enum SingletonTabs {
+        
+        Debenture("Debentures", "debenture"),
+        EodLoad("Load EOD Quotes", "eodLoad");
+        
+        private final String title;
+        private final String fxmlFileName;
+        
+        private SingletonTabs(final String title, final String fxmlFileName) {
+            this.title = title;
+            this.fxmlFileName = fxmlFileName;
+        }
+        
+        public String getTitle() {return title;}
+        public String getFxmlFileName() { return fxmlFileName;}
+        
+    }
+    
+    
     
     @Autowired FinSecService finSecService;
     
@@ -31,33 +49,49 @@ public class AppController {
         AmortizationTab tab = new AmortizationTab();
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
     }
 
     
     @FXML
     void openDebentureTab() throws IOException {
+        openSingletonTab(SingletonTabs.Debenture);
+    }
 
-        Optional<Tab> findFirst = tabPane.getTabs().stream()
-                .filter(t -> t.getText().equals(DEBENTURE_TAB_TITLE))
-                .findFirst();
+    
+    @FXML
+    void openEodTab () throws IOException {
+        openSingletonTab(SingletonTabs.EodLoad);
+    }
+ 
+    
+    private Optional<Tab> findTab(final String tabName) {
+        return tabPane.getTabs().stream()
+                .filter(t -> t.getText().equals(tabName))
+                .findFirst()
+                ;
+    }
+    
+    void openSingletonTab(final SingletonTabs tabDescriptor) throws IOException {
         
-        findFirst.ifPresentOrElse(
+        findTab(tabDescriptor.getTitle()).ifPresentOrElse(
+                
                 t -> tabPane.getSelectionModel().select(t),
+                
                 () -> {
                     try {
-                        Pane debenturePane = (Pane) App.loadFXML("debenture");
-                        Tab debentureTab = new Tab(DEBENTURE_TAB_TITLE);
-                        debentureTab.setContent(debenturePane);
-                        debentureTab.setClosable(true);
-                        tabPane.getTabs().add(debentureTab);
-                        tabPane.getSelectionModel().select(debentureTab);
+                        Pane pane = (Pane) App.loadFXML(tabDescriptor.getFxmlFileName());
+                        Tab tab = new Tab(tabDescriptor.getTitle());
+                        tab.setContent(pane);
+                        tab.setClosable(true);
+                        tabPane.getTabs().add(tab);
+                        tabPane.getSelectionModel().select(tab);
                     } catch (IOException ex) {
-                        log.error("Failed to find debenture tab", ex);
+                        log.error("Failed to find tab: " + tabDescriptor.getTitle(), ex);
                     }
                 }
         );
 
     }
+ 
     
 }
