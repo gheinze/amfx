@@ -315,8 +315,11 @@ public class LoanTermsController  {
         paymentColumn.setCellValueFactory(param -> param.getValue().payment);
         dateColumn.setCellValueFactory(param -> param.getValue().date);
         interestColumn.setCellValueFactory(param -> param.getValue().interest);
+        interestColumn.setStyle( "-fx-alignment: CENTER-RIGHT;");
         principalColumn.setCellValueFactory(param -> param.getValue().principal);
+        principalColumn.setStyle( "-fx-alignment: CENTER-RIGHT;");
         balanceColumn.setCellValueFactory(param -> param.getValue().balance);
+        balanceColumn.setStyle( "-fx-alignment: CENTER-RIGHT;");
         
         scheduleTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         scheduleTable.getSelectionModel().setCellSelectionEnabled(true);
