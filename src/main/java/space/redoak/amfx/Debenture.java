@@ -25,7 +25,7 @@ public class Debenture {
         private final SimpleStringProperty            symbol;
         private final SimpleStringProperty            description;
         private final SimpleObjectProperty<Float>     percentage;
-        private final LocalDate issueDate;
+        private final SimpleObjectProperty<LocalDate> issuedDate;
         private final SimpleObjectProperty            effectiveRate;
         private final SimpleObjectProperty<LocalDate> maturityDate;
         private final ObservableValue<Float>          closePrice;
@@ -45,7 +45,7 @@ public class Debenture {
             this.symbol = new SimpleStringProperty(debenture.getSymbol());
             this.description = new SimpleStringProperty(debenture.getDescr());
             this.percentage = new SimpleObjectProperty<>(debenture.getPercentage());
-            this.issueDate = debenture.getIssueDte();
+            this.issuedDate = new SimpleObjectProperty(debenture.getIssueDte());
             this.effectiveRate = new SimpleObjectProperty(debenture.getEffectiveRate());
             this.maturityDate = new SimpleObjectProperty(debenture.getMaturityDte());
             this.closePrice = new SimpleObjectProperty(debenture.getClosePrice());
@@ -110,8 +110,10 @@ public class Debenture {
         public final Float getPercentage() { return this.percentageProperty().getValue(); }
         public final void setPercentage(final Float percentage) { this.percentageProperty().set(percentage); }
 
-        public final LocalDate getIssueDate() { return issueDate; }
-        
+        public final SimpleObjectProperty<LocalDate> issuedDateProperty() { return this.issuedDate; }
+        public final LocalDate getIssuedDate() { return this.issuedDateProperty().get(); }
+        public final void setIssuedDate(final LocalDate issuedDate) { this.issuedDateProperty().set(issuedDate); }
+
         public final SimpleObjectProperty<Float> effectiveRateProperty() { return this.effectiveRate; }
         public final Float getEffectiveRate() { return this.effectiveRateProperty().getValue(); }
         public final void setEffectiveRate(final Float effectiveRate) { this.effectiveRateProperty().set(effectiveRate); }
@@ -199,13 +201,13 @@ public class Debenture {
         sb.append(getSymbol()).append(SEPARATOR);
         sb.append(getDescription()).append(SEPARATOR);
         sb.append(null == getPercentage()    ? "" : PERCENT_FORMAT.format(getPercentage())).append(SEPARATOR);
-        sb.append(null == getIssueDate()     ? "" : DATE_FORMAT.format(getIssueDate())).append(SEPARATOR);
+        sb.append(null == getIssuedDate()    ? "" : DATE_FORMAT.format(getIssuedDate())).append(SEPARATOR);
         sb.append(null == getMaturityDate()  ? "" : DATE_FORMAT.format(getMaturityDate())).append(SEPARATOR);
-        sb.append(null == getClosePrice()     ? "" : MONEY_FORMAT.format(getClosePrice())).append(SEPARATOR);
-        sb.append(null == getReadDate() ? "" : DATE_FORMAT.format(getReadDate())).append(SEPARATOR);
+        sb.append(null == getClosePrice()    ? "" : MONEY_FORMAT.format(getClosePrice())).append(SEPARATOR);
+        sb.append(null == getReadDate()      ? "" : DATE_FORMAT.format(getReadDate())).append(SEPARATOR);
         sb.append(getEffectiveRate()).append(SEPARATOR);
         sb.append(null == getUnderlyingSymbol()        ? "" : getUnderlyingSymbol()).append(SEPARATOR);
-        sb.append(null == getUnderlyingClosePrice()     ? "" : MONEY_FORMAT.format(getUnderlyingClosePrice())).append(SEPARATOR);
+        sb.append(null == getUnderlyingClosePrice()    ? "" : MONEY_FORMAT.format(getUnderlyingClosePrice())).append(SEPARATOR);
         sb.append(null == getUnderlyingReadDate() ? "" : DATE_FORMAT.format(getUnderlyingReadDate())).append(SEPARATOR);
         sb.append(null == getConversionPrice() ? "" : MONEY_FORMAT.format(getConversionPrice())).append(SEPARATOR);
         sb.append(getConversionRate()).append(SEPARATOR);

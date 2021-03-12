@@ -102,6 +102,7 @@ public class DebentureController {
     @FXML private TableColumn<Debenture, String> descriptionColumn;
     @FXML private TableColumn<Debenture, Float> parRateColumn;
     @FXML private TableColumn<Debenture, Float> effectiveRateColumn;
+    @FXML private TableColumn<Debenture, LocalDate> issuedColumn;
     @FXML private TableColumn<Debenture, LocalDate> maturityColumn;
     @FXML private TableColumn<Debenture, Float> closeColumn;
     @FXML private TableColumn<Debenture, Integer> volumeColumn;
@@ -119,6 +120,7 @@ public class DebentureController {
     @FXML private AnchorPane detailPane;
     @FXML private JFXTextField detailInterestRate;
     @FXML private Label detailSymbolLabel;
+    @FXML private JFXDatePicker detailIssuedDate;
     @FXML private JFXDatePicker detailMaturityDate;
     @FXML private JFXTextField detailUnderlyingSymbol;
     @FXML private JFXTextField detailConversionPrice;
@@ -129,7 +131,8 @@ public class DebentureController {
     private DebentureTableModel debentureTableModel;
 
     private String cachedPercentage;
-    private LocalDate cahcedMaturityDate;
+    private LocalDate cachedIssuedDate;
+    private LocalDate cachedMaturityDate;
     private String cachedUnderlyingSymbol;
     private String cachedConversionPrice;
     private String cachedProspectus;
@@ -164,6 +167,7 @@ public class DebentureController {
         effectiveRateColumn.setCellValueFactory(row -> row.getValue().effectiveRateProperty());
         effectiveRateColumn.setCellFactory((AbstractConvertCellFactory<Debenture, Float>) value -> Formats.Interest.nullSafeFormat(value));
         
+        issuedColumn.setCellValueFactory(row -> row.getValue().issuedDateProperty());
         maturityColumn.setCellValueFactory(row -> row.getValue().maturityDateProperty());
         
         closeColumn.setCellValueFactory(row -> row.getValue().closePriceProperty());
@@ -218,6 +222,7 @@ public class DebentureController {
         if (oldDebenture != null) {
             detailSymbolLabel.textProperty().unbindBidirectional(oldDebenture.symbolProperty());
             detailInterestRate.textProperty().unbindBidirectional(oldDebenture.percentageProperty());
+            detailIssuedDate.valueProperty().unbindBidirectional(oldDebenture.issuedDateProperty());
             detailMaturityDate.valueProperty().unbindBidirectional(oldDebenture.maturityDateProperty());
             detailUnderlyingSymbol.textProperty().unbindBidirectional(oldDebenture.underlyingSymbolProperty());
             detailConversionPrice.textProperty().unbindBidirectional(oldDebenture.conversionPriceProperty());
@@ -231,6 +236,7 @@ public class DebentureController {
         // If there is no debenture selected, nothing should go into the detail pane
         if (newDebenture == null) {
             detailInterestRate.clear();
+            detailIssuedDate.setValue(LocalDate.now());
             detailMaturityDate.setValue(LocalDate.now());
             detailUnderlyingSymbol.clear();
             detailConversionPrice.clear();
@@ -242,6 +248,7 @@ public class DebentureController {
         } else {
             Bindings.bindBidirectional(detailSymbolLabel.textProperty(), newDebenture.symbolProperty());
             Bindings.bindBidirectional(detailInterestRate.textProperty(), newDebenture.percentageProperty(), interestStringConverter);
+            Bindings.bindBidirectional(detailIssuedDate.valueProperty(), newDebenture.issuedDateProperty());
             Bindings.bindBidirectional(detailMaturityDate.valueProperty(), newDebenture.maturityDateProperty());
             Bindings.bindBidirectional(detailUnderlyingSymbol.textProperty(), newDebenture.underlyingSymbolProperty());
             Bindings.bindBidirectional(detailConversionPrice.textProperty(), newDebenture.conversionPriceProperty(), moneyStringConverter);
@@ -250,7 +257,8 @@ public class DebentureController {
 
             // Cache values in order to determine if the field becomes modified
             cachedPercentage = interestStringConverter.toString(newDebenture.percentageProperty().getValue());
-            cahcedMaturityDate = newDebenture.maturityDateProperty().getValue();
+            cachedIssuedDate = newDebenture.issuedDateProperty().getValue();
+            cachedMaturityDate = newDebenture.maturityDateProperty().getValue();
             cachedUnderlyingSymbol = newDebenture.underlyingSymbolProperty().getValue();
             cachedConversionPrice = moneyStringConverter.toString(newDebenture.conversionPriceProperty().getValue());
             cachedProspectus = hyperlinkStringConverter.toString(newDebenture.prospectusProperty().getValue());
@@ -318,15 +326,29 @@ public class DebentureController {
                 }
         );
                 
+        detailIssuedDate.focusedProperty().addListener(
+                (obs, oldVal, newVal) -> {
+                    if (!newVal) {
+                        LocalDate issuedDate = debentureTableModel.currentDebentureProperty().getValue().getIssuedDate();
+                        if (null != issuedDate && !issuedDate.equals(cachedIssuedDate)) {
+                            Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
+                            System.out.println("Write to db id: " + instrumentId + " issued: "+ issuedDate);
+                            finSecService.updateDebentureIssuedDate(instrumentId, issuedDate);
+                            cachedIssuedDate = issuedDate;
+                        }
+                    }
+                }
+        );
+
         detailMaturityDate.focusedProperty().addListener(
                 (obs, oldVal, newVal) -> {
                     if (!newVal) {
                         LocalDate maturityDate = debentureTableModel.currentDebentureProperty().getValue().getMaturityDate();
-                        if (null != maturityDate && !maturityDate.equals(cahcedMaturityDate)) {
+                        if (null != maturityDate && !maturityDate.equals(cachedMaturityDate)) {
                             Integer instrumentId = debentureTableModel.currentDebentureProperty().getValue().getInstrumentId();
                             System.out.println("Write to db id: " + instrumentId + " maturity: "+ maturityDate);
                             finSecService.updateDebentureMaturityDate(instrumentId, maturityDate);
-                            cahcedMaturityDate = maturityDate;
+                            cachedMaturityDate = maturityDate;
                         }
                     }
                 }

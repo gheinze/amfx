@@ -30,6 +30,7 @@
                         <TableColumn fx:id="effectiveRateColumn" prefWidth="93.0" style="-fx-alignment: CENTER-RIGHT;" text="Effective" />
                      </columns>
                   </TableColumn>
+                  <TableColumn fx:id="issuedColumn" minWidth="0.0" prefWidth="93.0" text="Issued" />
                   <TableColumn fx:id="maturityColumn" minWidth="0.0" prefWidth="93.0" text="Maturity" />
                   <TableColumn fx:id="closeColumn" minWidth="7.0" prefWidth="89.0" style="-fx-alignment: CENTER-RIGHT;" text="Close" />
                   <TableColumn fx:id="volumeColumn" minWidth="0.0" prefWidth="90.0" style="-fx-alignment: CENTER-RIGHT;" text="Volume" />
@@ -71,14 +72,15 @@
       </ToolBar>
    </top>
    <bottom>
-      <AnchorPane fx:id="detailPane" prefHeight="224.0" prefWidth="1763.0" BorderPane.alignment="CENTER">
+      <AnchorPane fx:id="detailPane" prefHeight="271.0" prefWidth="1763.0" BorderPane.alignment="CENTER">
          <children>
-            <JFXTextField fx:id="detailInterestRate" labelFloat="true" layoutX="95.0" layoutY="29.0" promptText="Interest Rate" />
-            <JFXDatePicker fx:id="detailMaturityDate" layoutX="317.0" layoutY="32.0" promptText="Maturity Date" />
-            <JFXTextField fx:id="detailUnderlyingSymbol" labelFloat="true" layoutX="95.0" layoutY="77.0" promptText="Underlying Symbol" />
-            <JFXTextField fx:id="detailConversionPrice" labelFloat="true" layoutX="317.0" layoutY="77.0" promptText="Conversion Price" />
-            <JFXTextField fx:id="detailProspectus" labelFloat="true" layoutX="95.0" layoutY="127.0" prefHeight="26.0" prefWidth="386.0" promptText="Prospectus" />
-            <JFXTextField fx:id="detailComments" labelFloat="true" layoutX="95.0" layoutY="173.0" prefHeight="26.0" prefWidth="388.0" promptText="Comments" />
+            <JFXTextField fx:id="detailInterestRate" labelFloat="true" layoutX="95.0" layoutY="24.0" promptText="Interest Rate" />
+            <JFXDatePicker fx:id="detailIssuedDate" layoutX="95.0" layoutY="75.0" promptText="Issue Date" />
+            <JFXDatePicker fx:id="detailMaturityDate" layoutX="317.0" layoutY="75.0" promptText="Maturity Date" />
+            <JFXTextField fx:id="detailUnderlyingSymbol" labelFloat="true" layoutX="95.0" layoutY="130.0" promptText="Underlying Symbol" />
+            <JFXTextField fx:id="detailConversionPrice" labelFloat="true" layoutX="317.0" layoutY="130.0" promptText="Conversion Price" />
+            <JFXTextField fx:id="detailProspectus" labelFloat="true" layoutX="95.0" layoutY="183.0" prefHeight="26.0" prefWidth="386.0" promptText="Prospectus" />
+            <JFXTextField fx:id="detailComments" labelFloat="true" layoutX="95.0" layoutY="229.0" prefHeight="26.0" prefWidth="388.0" promptText="Comments" />
             <Label fx:id="detailSymbolLabel" focusTraversable="false" layoutX="4.0" layoutY="65.0" rotate="-90.0" text="Symbol" textAlignment="RIGHT">
                <font>
                   <Font size="20.0" />

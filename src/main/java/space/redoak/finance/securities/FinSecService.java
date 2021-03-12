@@ -50,6 +50,10 @@ public class FinSecService {
         debentureRepo.updateDebentureDetailSetPercentageForInstrumentId(instrumentId, percentage);
     }
     
+    public void updateDebentureIssuedDate(Integer instrumentId, LocalDate issuedDate) {
+        debentureRepo.updateDebentureSetIssuedDateForInstrumentId(instrumentId, issuedDate);
+    }
+    
     public void updateDebentureMaturityDate(Integer instrumentId, LocalDate maturityDate) {
         debentureRepo.updateDebentureSetMaturityDateForInstrumentId(instrumentId, maturityDate);
     }

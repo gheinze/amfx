@@ -38,6 +38,20 @@ public interface DebentureRepository extends Repository<DebentureEntity, Long> {
             MERGE INTO sm_debenture_detail dd
                USING ( SELECT id FROM sm_instrument WHERE id = :instrumentId ) i
                ON dd.instrument_id = i.id
+               WHEN NOT MATCHED THEN INSERT (instrument_id, issue_dte) VALUES (i.id, :issueDate)
+               WHEN MATCHED THEN UPDATE SET issue_dte = :issueDate
+            """
+            ,nativeQuery = true)
+    int updateDebentureSetIssuedDateForInstrumentId(@Param("instrumentId") Integer instrumentId, @Param("issueDate") LocalDate issueDate);
+ 
+    
+    @Transactional
+    @Modifying
+    @Query(value =
+            """
+            MERGE INTO sm_debenture_detail dd
+               USING ( SELECT id FROM sm_instrument WHERE id = :instrumentId ) i
+               ON dd.instrument_id = i.id
                WHEN NOT MATCHED THEN INSERT (instrument_id, maturity_dte) VALUES (i.id, :maturityDate)
                WHEN MATCHED THEN UPDATE SET maturity_dte = :maturityDate
             """
