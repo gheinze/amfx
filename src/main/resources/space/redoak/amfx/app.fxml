@@ -59,7 +59,7 @@
                     <items>
                         <Button id="mortCalcButton" mnemonicParsing="false" onMouseClicked="#openMtgCalcTab">
                            <graphic>
-                              <FontAwesomeIconView glyphName="CALCULATOR" />
+                              <FontAwesomeIconView fill="#037215" glyphName="CALCULATOR" size="20" />
                            </graphic>
                            <tooltip>
                               <Tooltip text="Amortization Calculator" />
@@ -68,7 +68,7 @@
                         <Separator orientation="VERTICAL" />
                         <Button mnemonicParsing="false" onMouseClicked="#openDebentureTab">
                            <graphic>
-                              <FontAwesomeIconView />
+                              <FontAwesomeIconView size="20" />
                            </graphic>
                            <tooltip>
                               <Tooltip text="Debentures" />

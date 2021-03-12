@@ -24,10 +24,13 @@
         <items>
             <Button fx:id="pdfButton" mnemonicParsing="false" onMouseClicked="#pdfButtonClicked">
                <graphic>
-                  <FontAwesomeIconView glyphName="FILE_PDF_ALT" />
+                  <FontAwesomeIconView fill="#f20101" glyphName="FILE_PDF_ALT" size="20" />
                </graphic>
                <tooltip>
-                  <Tooltip text="PDF" />
+                  <Tooltip text="PDF">
+                     <font>
+                        <Font size="14.0" />
+                     </font></Tooltip>
                </tooltip>
             </Button>
         </items>
@@ -48,7 +51,7 @@
                      <children>
                         <JFXTextField fx:id="amYearsJfxTextField" labelFloat="true" layoutX="14.0" layoutY="18.0" prefHeight="26.0" prefWidth="50.0" promptText="Years" />
                         <JFXTextField fx:id="amMonthsJfxTextField" labelFloat="true" layoutX="85.0" layoutY="18.0" prefHeight="26.0" prefWidth="50.0" promptText="Months" />
-                        <JFXComboBox fx:id="compoundingPeriodJfxComboBox" labelFloat="true" layoutX="14.0" layoutY="74.0" prefHeight="26.0" prefWidth="148.0" promptText="Compounding" />
+                        <JFXComboBox fx:id="compoundingPeriodJfxComboBox" labelFloat="true" layoutX="14.0" layoutY="76.0" prefHeight="26.0" prefWidth="148.0" promptText="Compounding" />
                      </children>
                      <opaqueInsets>
                         <Insets />
@@ -82,7 +85,7 @@
                   </Label>
                   <JFXTextField fx:id="termYearsJfxTextField" labelFloat="true" layoutX="14.0" layoutY="224.0" prefHeight="26.0" prefWidth="50.0" promptText="Years" />
                   <JFXTextField fx:id="termMonthsJfxTextField" labelFloat="true" layoutX="75.0" layoutY="224.0" prefHeight="26.0" prefWidth="50.0" promptText="Months" />
-                  <JFXDatePicker fx:id="startDateJfxDatePicker" layoutX="14.0" layoutY="281.0" prefHeight="29.0" prefWidth="160.0" promptText="Start Date" />
+                  <JFXDatePicker fx:id="startDateJfxDatePicker" layoutX="14.0" layoutY="283.0" prefHeight="29.0" prefWidth="160.0" promptText="Start Date" />
                   <JFXDatePicker fx:id="adjustmentDateJfxDatePicker" layoutX="14.0" layoutY="360.0" prefHeight="29.0" prefWidth="160.0" promptText="Adjustment Date" />
                   <JFXTextField fx:id="paymentOverrideJfxTextField" labelFloat="true" layoutX="14.0" layoutY="440.0" prefHeight="26.0" prefWidth="148.0" promptText="Payment Override" />
                </children>

@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXDatePicker?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import com.jfoenix.controls.JFXToggleButton?>
-<?import de.jensd.fx.glyphs.materialicons.MaterialIconView?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
@@ -58,11 +59,14 @@
       <ToolBar focusTraversable="false" prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         <items>
             <JFXToggleButton fx:id="detailToggle" onAction="#handleToggle" prefHeight="24.0" prefWidth="118.0" text="Editor" />
-            <JFXButton disable="true" text="Edit Row">
+            <Button mnemonicParsing="false">
                <graphic>
-                  <MaterialIconView glyphName="EDIT" size="16" />
+                  <FontAwesomeIconView fill="RED" glyphName="GOOGLE_PLUS_OFFICIAL" onMouseClicked="#updateGoogleDoc" size="20" />
                </graphic>
-            </JFXButton>
+               <tooltip>
+                  <Tooltip text="Publish to Google Sheets" />
+               </tooltip>
+            </Button>
         </items>
       </ToolBar>
    </top>

@@ -1,6 +1,8 @@
 package space.redoak.amfx;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import javafx.beans.binding.Bindings;
@@ -23,6 +25,7 @@ public class Debenture {
         private final SimpleStringProperty            symbol;
         private final SimpleStringProperty            description;
         private final SimpleObjectProperty<Float>     percentage;
+        private final LocalDate issueDate;
         private final SimpleObjectProperty            effectiveRate;
         private final SimpleObjectProperty<LocalDate> maturityDate;
         private final ObservableValue<Float>          closePrice;
@@ -42,6 +45,7 @@ public class Debenture {
             this.symbol = new SimpleStringProperty(debenture.getSymbol());
             this.description = new SimpleStringProperty(debenture.getDescr());
             this.percentage = new SimpleObjectProperty<>(debenture.getPercentage());
+            this.issueDate = debenture.getIssueDte();
             this.effectiveRate = new SimpleObjectProperty(debenture.getEffectiveRate());
             this.maturityDate = new SimpleObjectProperty(debenture.getMaturityDte());
             this.closePrice = new SimpleObjectProperty(debenture.getClosePrice());
@@ -106,6 +110,8 @@ public class Debenture {
         public final Float getPercentage() { return this.percentageProperty().getValue(); }
         public final void setPercentage(final Float percentage) { this.percentageProperty().set(percentage); }
 
+        public final LocalDate getIssueDate() { return issueDate; }
+        
         public final SimpleObjectProperty<Float> effectiveRateProperty() { return this.effectiveRate; }
         public final Float getEffectiveRate() { return this.effectiveRateProperty().getValue(); }
         public final void setEffectiveRate(final Float effectiveRate) { this.effectiveRateProperty().set(effectiveRate); }
@@ -176,4 +182,37 @@ public class Debenture {
         return true;
     }
 
+    
+    
+    private static final String SEPARATOR = "~";
+    
+    private static final DecimalFormat MONEY_FORMAT = new DecimalFormat("#,###.00");
+    private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("#,###.000");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    //=IF(ISBLANK(H23),"", HYPERLINK(H23, "Prospectus"))
+
+    public String toCsv() {
+        
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(getSymbol()).append(SEPARATOR);
+        sb.append(getDescription()).append(SEPARATOR);
+        sb.append(null == getPercentage()    ? "" : PERCENT_FORMAT.format(getPercentage())).append(SEPARATOR);
+        sb.append(null == getIssueDate()     ? "" : DATE_FORMAT.format(getIssueDate())).append(SEPARATOR);
+        sb.append(null == getMaturityDate()  ? "" : DATE_FORMAT.format(getMaturityDate())).append(SEPARATOR);
+        sb.append(null == getClosePrice()     ? "" : MONEY_FORMAT.format(getClosePrice())).append(SEPARATOR);
+        sb.append(null == getReadDate() ? "" : DATE_FORMAT.format(getReadDate())).append(SEPARATOR);
+        sb.append(getEffectiveRate()).append(SEPARATOR);
+        sb.append(null == getUnderlyingSymbol()        ? "" : getUnderlyingSymbol()).append(SEPARATOR);
+        sb.append(null == getUnderlyingClosePrice()     ? "" : MONEY_FORMAT.format(getUnderlyingClosePrice())).append(SEPARATOR);
+        sb.append(null == getUnderlyingReadDate() ? "" : DATE_FORMAT.format(getUnderlyingReadDate())).append(SEPARATOR);
+        sb.append(null == getConversionPrice() ? "" : MONEY_FORMAT.format(getConversionPrice())).append(SEPARATOR);
+        sb.append(getConversionRate()).append(SEPARATOR);
+        sb.append(getConverted()).append(SEPARATOR);
+        sb.append(null == getProspectus() ? "" : getProspectus() instanceof String ? getProspectus() : ((Hyperlink)getProspectus()).getText()).append(SEPARATOR);
+        sb.append(null == getComments() ? "" : getComments());
+        
+        return sb.toString();
+    }    
 }

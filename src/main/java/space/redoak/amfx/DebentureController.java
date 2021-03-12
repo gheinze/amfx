@@ -3,6 +3,8 @@ package space.redoak.amfx;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.controls.JFXToggleButton;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +42,6 @@ import space.redoak.util.TableCutAndPaste;
  */
 @Component
 @Slf4j
-
 public class DebentureController {
 
     
@@ -414,4 +415,17 @@ public class DebentureController {
     }
     
  
+    @FXML
+    void updateGoogleDoc() {
+        
+        try {
+            finSecService.publishToGoogleDoc(
+                    debentureTableModel.getDebentureList().stream()
+            );
+        } catch (IOException | GeneralSecurityException ex) {
+            log.error("Error attempting to publish debentures to Google Docs", ex);
+        }
+        
+    }
+    
 }
