@@ -14,7 +14,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.sheets.v4.SheetsScopes;
-import java.awt.Desktop;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -31,9 +30,9 @@ import space.redoak.App;
 public class GoogleAuthorizeUtil {
 
    
-//   private static final File CREDENTIAL_FILE_LOCATION = new File(
-//           System.getProperty("user.home") + File.separator + ".amfx/google/googleDocDebentureCredential"
-//   );
+   private static final File CREDENTIAL_FILE_LOCATION = new File(
+           System.getProperty("user.home") + File.separator + ".amfx/google/googleDocDebentureCredential"
+   );
 
 
     public static Credential authorize(String clientCredentials) throws IOException, GeneralSecurityException {
@@ -52,8 +51,8 @@ public class GoogleAuthorizeUtil {
                 JacksonFactory.getDefaultInstance(),
                 clientSecrets,
                 scopes
-//        ).setDataStoreFactory(new com.google.api.client.util.store.FileDataStoreFactory(CREDENTIAL_FILE_LOCATION))
-        ).setDataStoreFactory(new com.google.api.client.util.store.MemoryDataStoreFactory())
+        ).setDataStoreFactory(new com.google.api.client.util.store.FileDataStoreFactory(CREDENTIAL_FILE_LOCATION))
+//        ).setDataStoreFactory(new com.google.api.client.util.store.MemoryDataStoreFactory())
                 .setAccessType("offline")
                 .build()
                 ;
