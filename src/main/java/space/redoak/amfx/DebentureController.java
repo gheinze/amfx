@@ -13,6 +13,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Control;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -23,6 +25,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +121,7 @@ public class DebentureController {
     @FXML private TableColumn<Debenture, String> commentsColumn;
     
     @FXML private JFXToggleButton detailToggle;
+
     @FXML private AnchorPane detailPane;
     @FXML private JFXTextField detailInterestRate;
     @FXML private Label detailSymbolLabel;
@@ -441,13 +446,27 @@ public class DebentureController {
     void updateGoogleDoc() {
         
         try {
+
             finSecService.publishToGoogleDoc(
                     debentureTableModel.getDebentureList().stream()
             );
+
+            alertGooglePublishCompete();
+            debentureTable.requestFocus();
+            
         } catch (IOException | GeneralSecurityException ex) {
             log.error("Error attempting to publish debentures to Google Docs", ex);
         }
         
+    }
+
+    private void alertGooglePublishCompete() {
+        Stage dialog = new Stage();
+        dialog.initStyle(StageStyle.UTILITY);
+        Text dailogText = new Text(75, 25, "Debenture publishing completed!");
+        Scene scene = new Scene(new Group(dailogText), 500, 100);
+        dialog.setScene(scene);
+        dialog.showAndWait();
     }
     
 }
