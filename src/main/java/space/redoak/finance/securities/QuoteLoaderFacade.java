@@ -56,7 +56,8 @@ public class QuoteLoaderFacade {
             this.completionCallback = completionCallback;
         }
         
-        @Override protected Void call() throws Exception {
+        @Override
+        protected Void call() throws Exception {
             try {    
                 quoteLoaderEodScraperService.extractEodForExchange(securityExchange, textFlowConsole, completionCallback);
             } catch (Throwable t) {

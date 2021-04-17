@@ -19,6 +19,7 @@ public class AppController {
     private enum SingletonTabs {
         
         Debenture("Debentures", "debenture"),
+        WatchLists("Watch Lists", "watchLists"),
         EodLoad("Load EOD Quotes", "eodLoad");
         
         private final String title;
@@ -61,6 +62,12 @@ public class AppController {
     @FXML
     void openEodTab () throws IOException {
         openSingletonTab(SingletonTabs.EodLoad);
+    }
+ 
+    
+    @FXML
+    void openWatchListsTab () throws IOException {
+        openSingletonTab(SingletonTabs.WatchLists);
     }
  
     

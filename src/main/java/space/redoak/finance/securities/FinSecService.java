@@ -31,6 +31,12 @@ public class FinSecService {
     @Autowired
     private QuoteRepository quoteRepository;
 
+    @Autowired
+    private InstrumentRepository instrumentRepository;
+
+    @Autowired
+    private InstrumentFilterRepository instrumentFilterRepository;
+    
     @Value("${finsec.debenture.googleDoc}")
     private String googleDebentureDoc;
     
@@ -75,11 +81,19 @@ public class FinSecService {
     }
     
     
+    public List<InstrumentFilterEntity> getInstrumentsSparse(String exchange) {
+        return instrumentFilterRepository.getInstrumentsSparse(exchange);
+    }
+    
+    public InstrumentEntity getInstrumentDetail(Integer id) {
+        return instrumentRepository.getInstrumentDetail(id);
+    }
+    
+
     public List<QuoteEntity> getQuotes(Integer instrumentId, LocalDate fromDate) {
         return quoteRepository.getQuotes(instrumentId, fromDate);
     }
  
-    
     public void publishToGoogleDoc(Stream<Debenture> debentureStream) throws IOException, GeneralSecurityException {
         
         List<List<Object>> range = debentureStream

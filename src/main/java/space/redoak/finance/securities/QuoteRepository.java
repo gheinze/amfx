@@ -21,5 +21,5 @@ public interface QuoteRepository extends JpaRepository<QuoteEntity, Long> {
                    """
             ,nativeQuery = true)
     List<QuoteEntity> getQuotes(@Param("instrumentId") Integer instrumentId, @Param("fromDate") LocalDate fromDate);
-    
+
 }

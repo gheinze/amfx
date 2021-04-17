@@ -44,6 +44,7 @@
                       </Menu>
                         <Menu mnemonicParsing="false" text="Securities">
                           <items>
+                              <MenuItem mnemonicParsing="false" onAction="#openWatchListsTab" text="Watch Lists" />
                             <MenuItem mnemonicParsing="false" onAction="#openDebentureTab" text="Debentures" />
                               <MenuItem mnemonicParsing="false" onAction="#openEodTab" text="Load End of Day Data" />
                           </items>
@@ -66,6 +67,14 @@
                            </tooltip>
                         </Button>
                         <Separator orientation="VERTICAL" />
+                        <Button mnemonicParsing="false" onMouseClicked="#openWatchListsTab">
+                           <graphic>
+                              <FontAwesomeIconView glyphName="EYE" size="20" />
+                           </graphic>
+                           <tooltip>
+                              <Tooltip text="Stock Watch Lists" />
+                           </tooltip>
+                        </Button>
                         <Button mnemonicParsing="false" onMouseClicked="#openDebentureTab">
                            <graphic>
                               <FontAwesomeIconView size="20" />

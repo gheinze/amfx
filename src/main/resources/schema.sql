@@ -109,10 +109,24 @@ CREATE TABLE IF NOT EXISTS sm_preferred_detail(
 ;
 
 
+CREATE TABLE IF NOT EXISTS sm_instrument_comments(
+   instrument_id     integer PRIMARY KEY
+  ,strike_price      NUMBER
+  ,comments           TEXT
+  ,CONSTRAINT sm_instrument_comments_id_fk
+     FOREIGN KEY(instrument_id)
+     REFERENCES sm_instrument(id)
+)
+;
+
+
 CREATE OR REPLACE VIEW sm_quote_vw 
 AS
-SELECT i.id AS instrument_id, i.symbol, i.descr, i.instrument_type, i.instrument_status, q.close_price, q.volume_traded, q.read_dte
+SELECT i.id AS instrument_id, i.symbol, i.descr, i.instrument_type, i.instrument_status
+      ,q.close_price, q.volume_traded, q.read_dte
+      ,c.strike_price, c.comments
   FROM sm_instrument i
+  LEFT JOIN sm_instrument_comments c ON (c.instrument_id = i.id)
   LEFT JOIN sm_eod_quote q
          ON (q.instrument_id = i. id
 			 AND
