@@ -169,6 +169,12 @@ SELECT q.instrument_id, q.symbol, q.descr
 ;
 
 
+CREATE TABLE IF NOT EXISTS sm_watch_list(
+   instrument_id    integer PRIMARY KEY
+  ,CONSTRAINT sm_watch_list_instrument_id_fk FOREIGN KEY(instrument_id) REFERENCES sm_instrument(id)
+)
+;
+
 /*
 CREATE OR REPLACE FUNCTION sm_load_eod_quotes(p_exchange TEXT, p_dte TEXT)
 RETURNS VOID AS $$

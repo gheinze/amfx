@@ -1,22 +1,29 @@
 package space.redoak.amfx;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import java.time.LocalDate;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.util.Callback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import space.redoak.finance.securities.FinSecService;
-import space.redoak.finance.securities.InstrumentEntity;
 import space.redoak.finance.securities.InstrumentFilterEntity;
+import space.redoak.util.TableCutAndPaste;
 
 /**
  *
@@ -35,20 +42,25 @@ public class WatchListController {
     @FXML private ListView<InstrumentFilterEntity> instrumentListView;
 
     
-    @FXML private TableView<?> watchListTable;
+    @FXML private TableView<Instrument> watchListTable;
 
-    @FXML private TableColumn<?, ?> symbolColumn;
-    @FXML private TableColumn<?, ?> nameColumn;
-    @FXML private TableColumn<?, ?> quoteDateColumn;
-    @FXML private TableColumn<?, ?> quoteColumn;
-    @FXML private TableColumn<?, ?> strikePriceColumn;
-    @FXML private TableColumn<?, ?> noteColumn;
+    @FXML private TableColumn<Instrument, Void> deleteColumn;
+    @FXML private TableColumn<Instrument, String> symbolColumn;
+    @FXML private TableColumn<Instrument, String> nameColumn;
+    @FXML private TableColumn<Instrument, LocalDate> quoteDateColumn;
+    @FXML private TableColumn<Instrument, Float> quoteColumn;
+    @FXML private TableColumn<Instrument, Float> strikePriceColumn;
+    @FXML private TableColumn<Instrument, String> commentsColumn;
 
+    
+    private WatchListTableModel watchListTableModel;
+    
     
     @FXML
     public void initialize() {
         
         prepareSecuritySelector();
+        prepareWatchListTable();
 
     }
     
@@ -97,14 +109,71 @@ public class WatchListController {
 
                 InstrumentFilterEntity selectedItem = instrumentListView.getSelectionModel().getSelectedItem();
                 System.out.println("Selection: " + selectedItem);
-                InstrumentEntity instrumentDetail = finsecService.getInstrumentDetail(selectedItem.getId());
-                System.out.println(instrumentDetail);
-                    //watchListModel.add(selectedItem);
+                Instrument instrument = finsecService.getInstrumentDetail(selectedItem.getId());
+                finsecService.addToWatchList(instrument);
+                watchListTableModel.addInstrument(instrument);
+                watchListTable.sort();
             }
             
         });
 
     }
 
+    
+    private void prepareWatchListTable() {
+        
+        symbolColumn.setCellValueFactory(row -> row.getValue().symbolProperty());
+        nameColumn.setCellValueFactory(row -> row.getValue().descriptionProperty());
+        quoteDateColumn.setCellValueFactory(row -> row.getValue().readDateProperty());
+        quoteColumn.setCellValueFactory(row -> row.getValue().closePriceProperty());
+        quoteColumn.setCellFactory((AbstractConvertCellFactory<Instrument, Float>) value -> Formats.Money.nullSafeFormat(value));
+        commentsColumn.setCellValueFactory(row -> row.getValue().commentsProperty());
+
+        prepareDeleteColumn();
+        
+        TableCutAndPaste.installCopyPasteHandler(watchListTable);
+
+        watchListTableModel = new WatchListTableModel(finsecService.getWatchList());
+        watchListTable.setItems(watchListTableModel.getWatchList());
+        
+        watchListTable.getSortOrder().add(symbolColumn);
+        
+    }
+    
+    private void prepareDeleteColumn() {
+        
+        Callback<TableColumn<Instrument, Void>, TableCell<Instrument, Void>> cellFactory
+                = new Callback<TableColumn<Instrument, Void>, TableCell<Instrument, Void>>() {
+            @Override
+            public TableCell<Instrument, Void> call(final TableColumn<Instrument, Void> param) {
+                return new DeleteButtonTableCell();
+            }
+        };
+
+        deleteColumn.setCellFactory(cellFactory);
+
+    }
+    
+    
+    private class DeleteButtonTableCell extends TableCell<Instrument, Void> {
+        
+        private final Button btn = new Button("", new FontAwesomeIconView(FontAwesomeIcon.TIMES));
+
+        public DeleteButtonTableCell() {
+            btn.setOnAction((ActionEvent event) -> {
+                Instrument instrument = getTableView().getItems().get(getIndex());
+                finsecService.removeFromWatchList(instrument);
+                watchListTableModel.removeInstrument(instrument);
+                watchListTable.sort();
+            });
+        }
+
+        @Override
+        public void updateItem(Void item, boolean empty) {
+            super.updateItem(item, empty);
+            setGraphic(empty ? null : btn);
+        }
+        
+    }
     
 }

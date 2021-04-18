@@ -81,5 +81,10 @@ public class Instrument {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return symbol.getValue();
+    }
+
     
 }

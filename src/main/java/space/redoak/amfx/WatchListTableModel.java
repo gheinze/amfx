@@ -17,28 +17,35 @@ public class WatchListTableModel {
     private final ObjectProperty<Instrument> currentInstrumentProperty = new SimpleObjectProperty<>();
 
     
-    public WatchListTableModel(List<Instrument> instruments) {        
-        watchList = FXCollections.observableArrayList(instruments);
+    public WatchListTableModel(List<Instrument> list) {
+        watchList = FXCollections.observableList(list);
     }
-    
-    
+        
     public final ObjectProperty<Instrument> currentInstrumentProperty() {
         return this.currentInstrumentProperty;
     }
 
+    
+    public ObservableList<Instrument> getWatchList() {
+        return watchList;
+    }
 
     public final Instrument getCurrentInstrument() {
         return this.currentInstrumentProperty().get();
     }
 
 
-    public final void setCurrentDebenture(final Instrument currentInstrument) {
+    public final void setCurrentInstrument(final Instrument currentInstrument) {
         this.currentInstrumentProperty().set(currentInstrument);
     }
 
+    
+    public void addInstrument(final Instrument instrument) {
+        watchList.add(instrument);
+    }
 
-    public ObservableList<Instrument> getInstrumentList() {
-        return watchList;
+    void removeInstrument(Instrument instrument) {
+        watchList.remove(instrument);
     }
     
 }

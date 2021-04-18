@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import space.redoak.amfx.Debenture;
+import space.redoak.amfx.Instrument;
 
 /**
  *
@@ -85,11 +86,25 @@ public class FinSecService {
         return instrumentFilterRepository.getInstrumentsSparse(exchange);
     }
     
-    public InstrumentEntity getInstrumentDetail(Integer id) {
-        return instrumentRepository.getInstrumentDetail(id);
+    public Instrument getInstrumentDetail(Integer id) {
+        return new Instrument(instrumentRepository.getInstrumentDetail(id));
     }
     
-
+    public void addToWatchList(Instrument instrument) {
+        instrumentRepository.addToWatchList(instrument.getInstrumentId());
+    }
+            
+    public void removeFromWatchList(Instrument instrument) {
+        instrumentRepository.removeFromWatchList(instrument.getInstrumentId());
+    }
+        
+    public List<Instrument> getWatchList() {
+        return instrumentRepository.getWatchList().stream()
+                .map(i -> new Instrument(i))
+                .collect(Collectors.toList())
+                ;
+    }
+    
     public List<QuoteEntity> getQuotes(Integer instrumentId, LocalDate fromDate) {
         return quoteRepository.getQuotes(instrumentId, fromDate);
     }
@@ -112,5 +127,5 @@ public class FinSecService {
                 ;
      
     }
-        
+
 }

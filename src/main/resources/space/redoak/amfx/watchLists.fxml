@@ -14,12 +14,13 @@
          <content>
             <TableView fx:id="watchListTable" prefHeight="371.0" prefWidth="1122.0">
               <columns>
-                <TableColumn fx:id="symbolColumn" editable="false" prefWidth="75.0" text="Symbol" />
-                <TableColumn fx:id="nameColumn" editable="false" prefWidth="75.0" text="Name" />
-                  <TableColumn fx:id="quoteDateColumn" prefWidth="114.0" text="Quote Date" />
-                  <TableColumn fx:id="quoteColumn" prefWidth="113.0" text="Quote" />
-                  <TableColumn fx:id="strikePriceColumn" prefWidth="101.0" text="Strike Price" />
-                  <TableColumn fx:id="noteColumn" prefWidth="736.0" text="Note" />
+                  <TableColumn fx:id="deleteColumn" prefWidth="33.0" />
+                <TableColumn fx:id="symbolColumn" editable="false" prefWidth="117.0" text="Symbol" />
+                <TableColumn fx:id="nameColumn" editable="false" prefWidth="189.0" text="Name" />
+                  <TableColumn fx:id="quoteDateColumn" minWidth="0.0" prefWidth="121.0" text="Quote Date" />
+                  <TableColumn fx:id="quoteColumn" prefWidth="93.0" text="Quote" />
+                  <TableColumn fx:id="strikePriceColumn" minWidth="0.0" prefWidth="108.0" text="Strike Price" />
+                  <TableColumn fx:id="commentsColumn" prefWidth="628.0" text="Comments" />
               </columns>
             </TableView>
          </content>
