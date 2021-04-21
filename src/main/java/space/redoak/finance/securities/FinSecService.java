@@ -105,6 +105,16 @@ public class FinSecService {
                 ;
     }
     
+    
+    public void updateInstrumentStrikePrice(int instrumentId, Float strikePrice) {
+        instrumentRepository.updateStrikePrice(instrumentId, strikePrice);
+    }
+
+    public void updateInstrumentComments(int instrumentId, String comments) {
+        instrumentRepository.updateComments(instrumentId, comments);
+    }
+    
+    
     public List<QuoteEntity> getQuotes(Integer instrumentId, LocalDate fromDate) {
         return quoteRepository.getQuotes(instrumentId, fromDate);
     }

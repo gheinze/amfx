@@ -19,8 +19,8 @@
                 <TableColumn fx:id="nameColumn" editable="false" prefWidth="189.0" text="Name" />
                   <TableColumn fx:id="quoteDateColumn" minWidth="0.0" prefWidth="121.0" text="Quote Date" />
                   <TableColumn fx:id="quoteColumn" prefWidth="93.0" text="Quote" />
-                  <TableColumn fx:id="strikePriceColumn" minWidth="0.0" prefWidth="108.0" text="Strike Price" />
-                  <TableColumn fx:id="commentsColumn" prefWidth="628.0" text="Comments" />
+                  <TableColumn fx:id="strikePriceColumn" minWidth="0.0" prefWidth="108.0" text="*Strike Price" />
+                  <TableColumn fx:id="commentsColumn" prefWidth="628.0" text="*Comments" />
               </columns>
             </TableView>
          </content>

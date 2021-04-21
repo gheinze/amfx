@@ -13,8 +13,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
@@ -23,6 +25,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import space.redoak.finance.securities.FinSecService;
 import space.redoak.finance.securities.InstrumentFilterEntity;
+import space.redoak.util.EditCell;
+import space.redoak.util.MoneyStringConverter;
 import space.redoak.util.TableCutAndPaste;
 
 /**
@@ -59,13 +63,13 @@ public class WatchListController {
     @FXML
     public void initialize() {
         
-        prepareSecuritySelector();
+        prepareInstrumentSelector();
         prepareWatchListTable();
 
     }
     
  
-    private void prepareSecuritySelector() {
+    private void prepareInstrumentSelector() {
         
         ObservableList<InstrumentFilterEntity> data = FXCollections.observableArrayList();
         data.addAll(finsecService.getInstrumentsSparse("TSX"));
@@ -127,10 +131,12 @@ public class WatchListController {
         quoteDateColumn.setCellValueFactory(row -> row.getValue().readDateProperty());
         quoteColumn.setCellValueFactory(row -> row.getValue().closePriceProperty());
         quoteColumn.setCellFactory((AbstractConvertCellFactory<Instrument, Float>) value -> Formats.Money.nullSafeFormat(value));
-        commentsColumn.setCellValueFactory(row -> row.getValue().commentsProperty());
 
         prepareDeleteColumn();
-        
+        prepareStrikePriceColumn();
+        prepareCommentsColumn();
+
+        setTableEditable();        
         TableCutAndPaste.installCopyPasteHandler(watchListTable);
 
         watchListTableModel = new WatchListTableModel(finsecService.getWatchList());
@@ -143,12 +149,7 @@ public class WatchListController {
     private void prepareDeleteColumn() {
         
         Callback<TableColumn<Instrument, Void>, TableCell<Instrument, Void>> cellFactory
-                = new Callback<TableColumn<Instrument, Void>, TableCell<Instrument, Void>>() {
-            @Override
-            public TableCell<Instrument, Void> call(final TableColumn<Instrument, Void> param) {
-                return new DeleteButtonTableCell();
-            }
-        };
+                = (final TableColumn<Instrument, Void> param) -> new DeleteButtonTableCell();
 
         deleteColumn.setCellFactory(cellFactory);
 
@@ -175,5 +176,132 @@ public class WatchListController {
         }
         
     }
+  
+    private void prepareStrikePriceColumn() {
+
+        strikePriceColumn.setCellValueFactory(row -> row.getValue().strikePriceProperty());
+
+        strikePriceColumn.setCellFactory(
+                EditCell.<Instrument, Float>forTableColumn(new MoneyStringConverter())
+        );
+
+        strikePriceColumn.setOnEditCommit(event -> {
+            
+            if (null == event.getNewValue()) {
+                return;
+            }
+            
+            final Float newStrikePrice = event.getNewValue();
+            
+            Instrument instrument = watchListTableModel
+                    .getWatchList()
+                    .get(event.getTablePosition().getRow())
+                    ;
+
+            instrument.setStrikePrice(newStrikePrice);
+            
+            watchListTable.refresh();
+            
+            finsecService.updateInstrumentStrikePrice(instrument.getInstrumentId(), newStrikePrice);
+            
+        });
+
+    }
     
+    
+    private void prepareCommentsColumn() {
+        
+        commentsColumn.setCellValueFactory(row -> row.getValue().commentsProperty());
+        
+        commentsColumn.setCellFactory(EditCell.<Instrument>forTableColumn());
+
+        commentsColumn.setOnEditCommit(event -> {
+            
+            if (null == event.getNewValue()) {
+                return;
+            }
+            
+            String newComments = event.getNewValue();
+            
+            Instrument instrument = watchListTableModel
+                    .getWatchList()
+                    .get(event.getTablePosition().getRow())
+                    ;
+
+            instrument.setComments(newComments);
+            
+            watchListTable.refresh();
+            
+            finsecService.updateInstrumentComments(instrument.getInstrumentId(), newComments);
+            
+        });
+
+    }
+
+
+    private void setTableEditable() {
+        watchListTable.setEditable(true);
+        watchListTable.getSelectionModel().cellSelectionEnabledProperty().set(true);
+        // when character or numbers pressed it will start edit in editable
+        // fields
+        watchListTable.setOnKeyPressed(event -> {
+            if (event.getCode().isLetterKey() || event.getCode().isDigitKey()) {
+                editFocusedCell();
+            } else if (event.getCode() == KeyCode.RIGHT
+                    || event.getCode() == KeyCode.TAB) {
+                watchListTable.getSelectionModel().selectNext();
+                event.consume();
+            } else if (event.getCode() == KeyCode.LEFT) {
+                // work around due to
+                // TableView.getSelectionModel().selectPrevious() due to a bug
+                // stopping it from working on
+                // the first column in the last row of the table
+                selectPrevious();
+                event.consume();
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private void editFocusedCell() {
+        final TablePosition<Instrument, ?> focusedCell = watchListTable
+                .focusModelProperty().get().focusedCellProperty().get();
+        watchListTable.edit(focusedCell.getRow(), focusedCell.getTableColumn());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void selectPrevious() {
+        if (watchListTable.getSelectionModel().isCellSelectionEnabled()) {
+            // in cell selection mode, we have to wrap around, going from
+            // right-to-left, and then wrapping to the end of the previous line
+            TablePosition<Instrument, ?> pos = watchListTable.getFocusModel()
+                    .getFocusedCell();
+            if (pos.getColumn() - 1 >= 0) {
+                // go to previous row
+                watchListTable.getSelectionModel().select(pos.getRow(),
+                        getTableColumn(pos.getTableColumn(), -1));
+            } else if (pos.getRow() < watchListTable.getItems().size()) {
+                // wrap to end of previous row
+                watchListTable.getSelectionModel().select(pos.getRow() - 1,
+                        watchListTable.getVisibleLeafColumn(
+                                watchListTable.getVisibleLeafColumns().size() - 1));
+            }
+        } else {
+            int focusIndex = watchListTable.getFocusModel().getFocusedIndex();
+            if (focusIndex == -1) {
+                watchListTable.getSelectionModel().select(watchListTable.getItems().size() - 1);
+            } else if (focusIndex > 0) {
+                watchListTable.getSelectionModel().select(focusIndex - 1);
+            }
+        }
+    }
+
+    private TableColumn<Instrument, ?> getTableColumn(
+            final TableColumn<Instrument, ?> column, int offset) {
+        int columnIndex = watchListTable.getVisibleLeafIndex(column);
+        int newColumnIndex = columnIndex + offset;
+        return watchListTable.getVisibleLeafColumn(newColumnIndex);
+    }
+
+
 }

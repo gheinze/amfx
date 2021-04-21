@@ -60,4 +60,31 @@ public interface InstrumentRepository extends Repository<InstrumentEntity, Long>
         int removeFromWatchList(@Param("instrumentId") int instrumentId);
 
 
+    @Transactional
+    @Modifying
+    @Query(value =
+            """
+            MERGE INTO sm_instrument_comments c
+            USING ( SELECT id FROM sm_instrument WHERE id = :instrumentId ) i
+            ON c.instrument_id = i.id
+            WHEN NOT MATCHED THEN INSERT (instrument_id, strike_price) VALUES (:instrumentId, :strikePrice)
+            WHEN MATCHED THEN UPDATE SET strike_price = :strikePrice
+            """
+            ,nativeQuery = true)
+    void updateStrikePrice(@Param("instrumentId") int instrumentId, @Param("strikePrice") Float strikePrice);
+
+    
+    @Transactional
+    @Modifying
+    @Query(value =
+            """
+            MERGE INTO sm_instrument_comments c
+            USING ( SELECT id FROM sm_instrument WHERE id = :instrumentId ) i
+            ON c.instrument_id = i.id
+            WHEN NOT MATCHED THEN INSERT (instrument_id, comments) VALUES (:instrumentId, :comments)
+            WHEN MATCHED THEN UPDATE SET comments = :comments
+            """
+            ,nativeQuery = true)
+    void updateComments(@Param("instrumentId") int instrumentId, @Param("comments") String comments);
+    
 }
