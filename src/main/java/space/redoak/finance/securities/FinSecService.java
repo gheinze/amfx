@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import space.redoak.amfx.Debenture;
 import space.redoak.amfx.Instrument;
+import space.redoak.finance.securities.AlphaVantageQuoteDao.GlobalQuote;
 
 /**
  *
@@ -37,6 +38,10 @@ public class FinSecService {
 
     @Autowired
     private InstrumentFilterRepository instrumentFilterRepository;
+    
+    @Autowired
+    private AlphaVantageService quoteService;
+    
     
     @Value("${finsec.debenture.googleDoc}")
     private String googleDebentureDoc;
@@ -104,7 +109,7 @@ public class FinSecService {
                 .collect(Collectors.toList())
                 ;
     }
-    
+
     
     public void updateInstrumentStrikePrice(int instrumentId, Float strikePrice) {
         instrumentRepository.updateStrikePrice(instrumentId, strikePrice);
@@ -119,6 +124,12 @@ public class FinSecService {
         return quoteRepository.getQuotes(instrumentId, fromDate);
     }
  
+    
+    public GlobalQuote lookupQuote(String symbol) throws IOException {
+        return quoteService.getQuote(symbol);        
+    }
+    
+    
     public void publishToGoogleDoc(Stream<Debenture> debentureStream) throws IOException, GeneralSecurityException {
         
         List<List<Object>> range = debentureStream

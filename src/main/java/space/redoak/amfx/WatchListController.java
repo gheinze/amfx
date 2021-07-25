@@ -2,7 +2,15 @@ package space.redoak.amfx;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -20,9 +28,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
+import javafx.util.Duration;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import space.redoak.finance.securities.AlphaVantageQuoteDao;
 import space.redoak.finance.securities.FinSecService;
 import space.redoak.finance.securities.InstrumentFilterEntity;
 import space.redoak.util.EditCell;
@@ -33,6 +44,7 @@ import space.redoak.util.TableCutAndPaste;
  *
  * @author glenn
  */
+@Slf4j
 @Component
 @Scope("prototype")
 public class WatchListController {
@@ -44,6 +56,7 @@ public class WatchListController {
     @FXML private TextField filterField;
      
     @FXML private ListView<InstrumentFilterEntity> instrumentListView;
+    @FXML private Button updateQuotesButton;
 
     
     @FXML private TableView<Instrument> watchListTable;
@@ -154,8 +167,7 @@ public class WatchListController {
         deleteColumn.setCellFactory(cellFactory);
 
     }
-    
-    
+
     private class DeleteButtonTableCell extends TableCell<Instrument, Void> {
         
         private final Button btn = new Button("", new FontAwesomeIconView(FontAwesomeIcon.TIMES));
@@ -303,5 +315,47 @@ public class WatchListController {
         return watchListTable.getVisibleLeafColumn(newColumnIndex);
     }
 
+    
+    @FXML
+    void handleUpdateQuotes(MouseEvent event) {
+        
+            FilteredList<Instrument> quoteList = watchListTableModel
+                    .getWatchList()
+                    .filtered(i -> i.getReadDate().isBefore(LocalDate.now()));
 
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(12), new EventHandler<ActionEvent>() {
+                    private int i = 0;
+                    @Override
+                    public void handle(ActionEvent event) {
+                        lookupQuote(quoteList.get(i));
+                        i++;
+                    }
+                }));
+        
+        timeline.setCycleCount(quoteList.size() - 1);
+        timeline.play();
+        
+    }
+    
+    private void lookupQuote(Instrument instrument) {
+        
+        try {
+            
+            AlphaVantageQuoteDao.GlobalQuote quote = finsecService.lookupQuote(instrument.getSymbol());
+            if (null == quote.getClosingPrice()) {
+                log.warn("Failed to retrieve quote for: " + instrument.getSymbol());
+                return;
+            }
+            
+            instrument.setClosePrice(quote.getClosingPrice().floatValue());
+            instrument.setReadDate(quote.getLocalDate());
+            
+        } catch (IOException ex) {
+            log.warn("Failed to fetch quote for: " + instrument.getSymbol(), ex);
+        }
+        
+    }
+    
+    
 }

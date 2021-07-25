@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ import space.redoak.util.TextFlowConsole;
  * @author glenn
  */
 @Service
+@Slf4j
 public class QuoteLoaderEodScraperService {
 
     @Value("${eod.dataOutputDir}")
@@ -94,6 +96,8 @@ public class QuoteLoaderEodScraperService {
                 fileName
         ));
         
+        log.info(String.format("Staging file for EOD quotes: %s", fileName));
+        
         File outputFile = new File(fileName);
 
         extractToFile(exchangeQuoteBaseUrl, outputFile, textFlowConsole);
@@ -128,6 +132,15 @@ public class QuoteLoaderEodScraperService {
                 Element quoteTable = doc.select("table.quotes").first();
                 Elements rows = quoteTable.select("tr");
 
+//                rows.stream()
+//                        .skip(1)  //first row contains column names
+//                        .map(r -> generateCsvLineFromRow(r))
+//                        .forEach(line -> {
+//                           pw.println(line);
+//                           sb.append(line).append("\n");
+//                        })
+//                        ;
+                
                 for (int rowIndex = 1; rowIndex < rows.size(); rowIndex++) { //first row is the col names so skip it.
                     String csvLine = generateCsvLineFromRow(rows.get(rowIndex));
                     pw.println(csvLine);
